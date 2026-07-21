@@ -1,0 +1,24 @@
+# OS / editor artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# Node (if ever added)
+node_modules/
+
+# Build output (none currently, reserved for future)
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code session files (local only)
+.claude/
+
+# Logs
+*.log

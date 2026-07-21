@@ -1,0 +1,25 @@
+{
+  "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-03",
+  "title": "משימת כיתה — מעבר",
+  "learningUnitId": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01",
+  "componentPurpose": "practice",
+  "isAssessment": false,
+  "manufacture": "methodica",
+  "isRequired": true,
+  "order": 3,
+  "languages": [
+    "Hebrew"
+  ],
+  "skills": [],
+  "estimatedTimeInMinutes": 5,
+  "subContent": [
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-03-001",
+      "title": "משימת כיתה — מדידה במרחב הכיתה",
+      "informationToBot": "מסך מעבר: הנחיות למשימת כיתה ללא מחשב — מדידת מסה של חפץ מוצק על ידי שלושה תלמידים (או 3 מדידות עצמיות) והשוואת התוצאות. אין הערכה בתוך המערכת.",
+      "contentType": "ClassroomTask",
+      "mediaFormat": "Interactive Content",
+      "questions": []
+    }
+  ]
+}

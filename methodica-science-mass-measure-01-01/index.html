@@ -1,0 +1,2350 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>לומדה — מדידת מסה</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       GLOBAL — Report / Issue button (Figma "issue button" component).
+       Appears on EVERY screen. Lives OUTSIDE all .screen divs so it
+       is shared, not duplicated per screen. Visual only for now;
+       no click behavior wired.
+       States: default (gray circle) → hover (blue circle + label).
+       Icon shapes are the exact Figma assets; the "מצאתם בעיה?" label
+       is live HTML (shown on hover) — text is never baked into the PNG.
+       Pop-up variant is intentionally NOT implemented.
+       ═══════════════════════════════════════════════════════════ -->
+  <button class="flag-btn" id="flag-btn" type="button" aria-label="מצאתם בעיה?">
+    <span class="flag-btn-icon"></span>
+    <span class="flag-btn-label">מצאתם בעיה?</span>
+  </button>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S0 — Screen 01 · TwoOptionSelection
+       "מי תלווה אותנו בלמידה?" — choose a learning companion.
+       First screen: NO back button. Single selection enables בחרתי.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen active" data-screen="0" id="s0">
+
+    <div class="select-content">
+      <div class="select-head">
+        <h1 class="select-title">מי תלווה אותנו בלמידה?</h1>
+        <p class="select-subtitle">בחרו דמות</p>
+      </div>
+
+      <!-- TwoOptionSelection cards — single-select, role=radiogroup for a11y -->
+      <div class="option-cards" role="radiogroup" aria-label="בחרו דמות">
+        <div class="option-card" role="radio" aria-checked="false" tabindex="0"
+             data-value="character-1" aria-label="דמות סגולה מחזיקה מאזניים דיגיטליים" onclick="selectOption(this)">
+          <div class="option-card-img">
+            <img src="assets/img/character-1-selection.png" alt="דמות סגולה מחזיקה מאזניים דיגיטליים">
+          </div>
+          <!-- Name + description labels removed for now (not needed yet) -->
+        </div>
+
+        <div class="option-card" role="radio" aria-checked="false" tabindex="0"
+             data-value="character-2" aria-label="דמות טורקיז לובשת חלוק מעבדה ומחזיקה כוס מדידה" onclick="selectOption(this)">
+          <div class="option-card-img">
+            <img src="assets/img/character-2-selection.png" alt="דמות טורקיז לובשת חלוק מעבדה ומחזיקה כוס מדידה">
+          </div>
+          <!-- Name + description labels removed for now (not needed yet) -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Continue button: visible immediately, disabled until a selection is made.
+         No Back button — this is the first screen. -->
+    <button class="btn-continue" id="s0-continue" disabled onclick="advanceFromS0()">בחרתי</button>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S1 — Screen 02 · SingleChoiceQuestion
+       Question image (left) + question text + 4 single-choice
+       options (right). Bottom bar: צדקתי? / אפשר רמז? / חזרה.
+       States (one screen, JS-driven): before, selected, hint modal,
+       try-again (1st wrong), correct, incorrect-2nd-attempt.
+       No progress bar. Flag button is global (above).
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="1" id="s1">
+
+    <div class="scq-question">
+      <!-- Real content image (object-fit: contain, no distortion).
+           Place the photo at img/question-balloons-scales.jpg.
+           If the file is missing, onerror hides the broken glyph so the
+           clean gray container shows instead. -->
+      <div class="scq-img">
+        <div class="scq-img-inner">
+          <button class="img-zoom-btn" type="button" aria-label="הגדלת התמונה"
+                  data-zoom-src="assets/img/BalloonsAndWeight.png"
+                  data-zoom-alt="שני מאזניים: על אחד בלון מנופח ועל השני בלון ריק">
+            <svg class="img-zoom-btn__icon" aria-hidden="true" width="20" height="20" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1C11.8661 1 15 4.13371 15 7.99902C15 11.8643 11.8661 14.998 8 14.998C4.1339 14.998 1.00002 11.8643 1 7.99902C1 4.13371 4.13389 1 8 1Z" stroke="currentColor" stroke-width="2"/><path d="M12.6221 14.188L14.2657 12.6141L19.928 18.5274C20.3626 18.9813 20.347 19.7016 19.8931 20.1362C19.4392 20.5708 18.7189 20.5552 18.2843 20.1013L12.6221 14.188Z" fill="currentColor"/></svg>
+          </button>
+          <img src="assets/img/BalloonsAndWeight.png"
+               alt="שני מאזניים: על אחד בלון מנופח ועל השני בלון ריק"
+               onerror="this.style.display='none'">
+          <!-- Weight readouts overlaid on the scales' front panels
+               (same tag style as the name tags in part 02 S1) -->
+          <div class="scq-scale-labels" aria-hidden="true">
+            <span class="scq-scale-label scq-scale-label--inflated">3.5 גרם</span>
+            <span class="scq-scale-label scq-scale-label--empty">3 גרם</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question text (live HTML) -->
+      <div class="scq-qtext">
+        <p>שני הבלונים עשויים מאותו החומר. נחשו, למה האחד כבד יותר מהשני?</p>
+      </div>
+
+      <!-- Four single-choice options (live HTML text, radio semantics) -->
+      <div class="scq-answers" id="scq-answers" role="radiogroup"
+           aria-label="שני הבלונים עשויים מאותו גומי. נחשו, למה האחד כבד יותר מהשני?">
+        <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                data-id="a" onclick="scqSelect('a')">
+          <span class="scq-opt-text">הגומי של הבלון המנופח נמתח ונהיה כבד יותר</span>
+          <span class="scq-radio" aria-hidden="true"></span>
+        </button>
+        <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                data-id="b" onclick="scqSelect('b')">
+          <span class="scq-opt-text">האוויר שבתוך הבלון המנופח מעלה את <span class="tooltip-word">המסה<span class="scq-info" tabindex="0" role="button" aria-label="מסה היא כמות החומר שיש בגוף, לא משנה אם הוא מוצק, נוזל או גז."><svg class="scq-info-i" aria-hidden="true" width="15" height="15" viewBox="0 0 15 15" fill="none"><rect width="15" height="15" rx="7.5" fill="#019DE5"/><path d="M7.12194 12.3271C6.88994 12.3271 6.69394 12.2931 6.53394 12.2251C6.37794 12.1571 6.26394 12.0631 6.19194 11.9431C6.11994 11.8191 6.09394 11.6731 6.11394 11.5051C6.13394 11.3251 6.16194 11.1051 6.19794 10.8451C6.23794 10.5851 6.27994 10.2931 6.32394 9.9691C6.37194 9.6451 6.42394 9.2951 6.47994 8.9191C6.53594 8.5431 6.58994 8.1511 6.64194 7.7431C6.69794 7.3351 6.75394 6.9191 6.80994 6.4951L6.11394 6.1651L6.19794 5.6911L8.27994 5.3971L8.57394 5.5351L7.78194 10.9951C7.76194 11.1391 7.76994 11.2491 7.80594 11.3251C7.84194 11.3971 7.89994 11.4331 7.97994 11.4331C8.05194 11.4331 8.12994 11.4111 8.21394 11.3671C8.30194 11.3191 8.41394 11.2391 8.54994 11.1271L8.70594 11.4931C8.66194 11.5531 8.57194 11.6491 8.43594 11.7811C8.30394 11.9131 8.12794 12.0371 7.90794 12.1531C7.68794 12.2691 7.42594 12.3271 7.12194 12.3271ZM7.84194 4.5931C7.60594 4.5931 7.40394 4.5051 7.23594 4.3291C7.07194 4.1531 6.99594 3.9471 7.00794 3.7111C7.01994 3.4191 7.11594 3.1731 7.29594 2.9731C7.47994 2.7731 7.72594 2.6731 8.03394 2.6731C8.29794 2.6731 8.50794 2.7591 8.66394 2.9311C8.81994 3.0991 8.89594 3.2931 8.89194 3.5131C8.88794 3.8171 8.79794 4.0731 8.62194 4.2811C8.44594 4.4891 8.18594 4.5931 7.84194 4.5931Z" fill="white"/></svg><span class="scq-tooltip" role="tooltip">מסה היא כמות החומר שיש בגוף, לא משנה אם הוא מוצק, נוזל או גז.</span></span></span> שלו</span>
+          <span class="scq-radio" aria-hidden="true"></span>
+        </button>
+        <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                data-id="c" onclick="scqSelect('c')">
+          <span class="scq-opt-text">המאזניים לא תקינים — שניהם אמורים לשקול אותו דבר</span>
+          <span class="scq-radio" aria-hidden="true"></span>
+        </button>
+        <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                data-id="d" onclick="scqSelect('d')">
+          <span class="scq-opt-text">הבלון המנופח כבד יותר כי הוא לוחץ חזק יותר על הכף</span>
+          <span class="scq-radio" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Feedback panel (left, bottom-anchored). Color + content swapped per state. -->
+    <div class="scq-feedbox hidden" id="scq-feedbox" role="status" aria-live="polite">
+
+      <!-- Try Again (1st wrong) -->
+      <div class="scq-fb hidden" data-fb="retry">
+        <div class="scq-fb-row">
+          <span class="scq-fb-title">התשובה אינה נכונה.</span>
+          <button class="scq-fb-toggle" type="button" aria-label="כיווץ/הרחבה"
+                  onclick="scqToggleFeedbox()"></button>
+        </div>
+        <div class="scq-fb-text">
+          <p>לא נורא, גם מטעויות לומדים.</p>
+          <p>ננסה שוב?</p>
+        </div>
+      </div>
+
+      <!-- Correct -->
+      <div class="scq-fb hidden" data-fb="correct">
+        <div class="scq-fb-row">
+          <span class="scq-fb-title">נכון.</span>
+          <button class="scq-fb-toggle" type="button" aria-label="כיווץ/הרחבה"
+                  onclick="scqToggleFeedbox()"></button>
+        </div>
+        <div class="scq-fb-text">
+          <p>האוויר בבלון מעלה את המסה של הבלון.</p>
+          <p>איך נמדוד מסה בצורה מהימנה?</p>
+          <p>בואו נלמד יחד!</p>
+        </div>
+      </div>
+
+      <!-- Incorrect — second attempt -->
+      <div class="scq-fb hidden" data-fb="wrong2">
+        <div class="scq-fb-row">
+          <span class="scq-fb-title">תשובתך אינה נכונה.</span>
+          <button class="scq-fb-toggle" type="button" aria-label="כיווץ/הרחבה"
+                  onclick="scqToggleFeedbox()"></button>
+        </div>
+        <div class="scq-fb-text">
+          <p>התשובה הנכונה מסומנת.</p>
+          <p>האוויר בבלון מעלה את המסה של הבלון.</p>
+          <p>איך נמדוד מסה בצורה מהימנה?</p>
+          <p>בואו נלמד יחד!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom action bar: [check + hint] (left) · [back] (right) -->
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="scq-check" type="button" disabled
+                onclick="scqCheck()">צדקתי?</button>
+        <button class="scq-hint" id="scq-hint" type="button" onclick="scqOpenHint()">
+          <span>אפשר רמז?</span>
+          <img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt="">
+        </button>
+      </div>
+      <button class="scq-back" id="scq-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+  </section>
+
+  <!-- S1 feedback popup — outside .screen so display:none on inactive screens never hides it -->
+  <div class="scq-popup hidden" id="scq-popup"
+       onpointerdown="scqPopupMouseDown(event)"
+       role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button"
+              onclick="scqClosePopup()" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="scq-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="scq-popup-body"></div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S2 — Screen 03 · FlipCardsReveal
+       Title + subtitle + two flip cards (image front / text back).
+       Both cards must be revealed at least once to unlock Continue.
+       Layout mirrors Screen 00 (TwoOptionSelection).
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="2" id="s2">
+
+    <div class="select-content">
+      <div class="select-head">
+        <h1 class="select-title">למה חשוב למדוד נכון?</h1>
+        <p class="select-subtitle">לחצו על התמונות</p>
+      </div>
+
+      <!-- Cards sit directly in .option-cards — no .frc-col wrapper needed
+           since 325×325 cards fill the row without a column spacer.
+           Gap between cards overridden to 100px via #s2 .option-cards in CSS. -->
+      <div class="option-cards" role="group" aria-label="כרטיסיות — לחצו לגלות">
+
+        <!-- Card 0: Pharmacist -->
+        <button
+          class="frc-card"
+          data-index="0"
+          data-base-label="כרטיסייה — רופאה ואנטיביוטיקה. לחצו להפוך"
+          type="button"
+          aria-expanded="false"
+          aria-label="כרטיסייה — רופאה ואנטיביוטיקה. לחצו להפוך"
+          onclick="frcFlip(this)"
+        >
+          <div class="frc-card-inner">
+            <div class="frc-card-front">
+              <img src="assets/img/Pharmasist.png" alt="רופאה" onerror="this.style.display='none'">
+            </div>
+            <div class="frc-card-back" aria-hidden="true">
+              <div class="frc-card-back-content">
+                <!-- Figma: 2 paragraphs — dose lines merged into para 2 -->
+                <p>הרופאה רשמה לך אנטיביוטיקה? המינון מחושב לפי המסה המדויקת שלך בקילוגרמים.</p>
+                <p>מנה נמוכה מדי - התרופה לא תשפיע. מנה גבוהה מדי - עלולה לגרום נזק.</p>
+              </div>
+            </div>
+          </div>
+        </button>
+
+        <!-- Card 1: Cake -->
+        <button
+          class="frc-card"
+          data-index="1"
+          data-base-label="כרטיסייה — עוגה ואפייה. לחצו להפוך"
+          type="button"
+          aria-expanded="false"
+          aria-label="כרטיסייה — עוגה ואפייה. לחצו להפוך"
+          onclick="frcFlip(this)"
+        >
+          <div class="frc-card-inner">
+            <div class="frc-card-front">
+              <img src="assets/img/Cake.png" alt="עוגה" onerror="this.style.display='none'">
+            </div>
+            <div class="frc-card-back" aria-hidden="true">
+              <div class="frc-card-back-content">
+                <!-- 2 paragraphs: dash-joined sentence merged so lines fill like the left card (words unchanged) -->
+                <p>בעוגה בה המתכון דורש 5 גרמים של אבקת אפייה - גרם אחד יותר מדי או פחות מדי משנה את התוצאה לגמרי.</p>
+                <p>העוגה לא תתפח, או תתפח יותר מדי ותקרוס.</p>
+              </div>
+            </div>
+          </div>
+        </button>
+
+      </div>
+    </div>
+
+    <button class="btn-continue" id="s2-continue" disabled onclick="advanceFromS2()">שנמשיך?</button>
+    <button class="scq-back" id="s2-back" type="button" onclick="goBack()">חזרה</button>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S3 — Screen 04 · DragAndDropQuestion
+       Learner drags 3 images into 2 labeled drop targets.
+       AnalogWeights → מאזני כפות (correct)
+       DigitalWeights → מאזניים דיגיטליים (correct)
+       HumanWeight → distractor, always wrong
+       Check enables when both targets are filled.
+       One attempt; no hint. Feedback popup: floating + draggable.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="3" id="s3">
+
+    <!-- Content block: 810px wide, flex-column, centered above 74px bar -->
+    <div class="ddq-content">
+
+      <!-- Text header -->
+      <div class="ddq-header">
+        <div class="ddq-header-top">
+          <h1 class="ddq-title">באילו סוגי מאזניים נשתמש למדידות מדעיות?</h1>
+          <p class="ddq-subtitle">למדידות מדעיות נשתמש בשני סוגי מאזניים – מאזני כפות ומאזניים דיגיטליים.</p>
+        </div>
+        <div class="ddq-instructions">
+          <p>גררו את התמונה המתאימה לכל סוג מאזניים.</p>
+          <p>חשבו היטב, יש רק פעם אחת לנסות....</p>
+        </div>
+      </div>
+
+      <!-- Source tray: 3 draggable cards
+           direction:ltr → physical order: Digital(left) | Human(mid) | Analog(right)
+           Reads RTL as: Analog · Human · Digital  -->
+      <div class="ddq-source" id="ddq-source">
+
+        <div class="ddq-source-slot">
+          <div class="ddq-drag-card ddq-item--digital" id="drag-digital">
+            <img class="ddq-card-img" src="assets/img/DigitalWeights.jpeg" alt="מאזניים דיגיטליים"
+                 onerror="this.closest('.ddq-drag-card').style.background='#d9d9d9'">
+          </div>
+        </div>
+
+        <div class="ddq-source-slot">
+          <div class="ddq-drag-card ddq-item--human" id="drag-human">
+            <img class="ddq-card-img" src="assets/img/HumanWeight.jpeg" alt="מאזני משקל גוף"
+                 onerror="this.closest('.ddq-drag-card').style.background='#d9d9d9'">
+          </div>
+        </div>
+
+        <div class="ddq-source-slot">
+          <div class="ddq-drag-card ddq-item--analog" id="drag-analog">
+            <img class="ddq-card-img" src="assets/img/AnalogWeights.jpg" alt="מאזני כפות"
+                 onerror="this.closest('.ddq-drag-card').style.background='#d9d9d9'">
+          </div>
+        </div>
+
+      </div><!-- /.ddq-source -->
+
+      <!-- Drop targets row
+           direction:ltr → physical order: Digital(left) | Analog(right)
+           Reads RTL as: מאזני כפות (right) · מאזניים דיגיטליים (left) -->
+      <div class="ddq-targets-row">
+
+        <div class="ddq-target-col">
+          <div class="ddq-target" id="target-digital"></div>
+          <p class="ddq-target-label">מאזניים דיגיטליים</p>
+        </div>
+
+        <div class="ddq-target-col">
+          <div class="ddq-target" id="target-analog"></div>
+          <p class="ddq-target-label">מאזני כפות</p>
+        </div>
+
+      </div><!-- /.ddq-targets-row -->
+
+    </div><!-- /.ddq-content -->
+
+    <!-- Bottom bar: צדקתי? (left, disabled until both targets filled) · חזרה (right) -->
+    <button class="btn-continue" id="ddq-check" type="button"
+            disabled onclick="ddqCheck()">צדקתי?</button>
+    <button class="scq-back" id="s3-back" type="button"
+            onclick="goBack()">חזרה</button>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S4 — Screen 05 · TwoOptionSelection
+       "איך נמדוד נכון?" — choose a learning style (listening or cards).
+       Not the first screen: Back button is visible.
+       Right option → character-listening → future video screen.
+       Left option  → character-cards    → future cards screen.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="4" id="s4">
+
+    <div class="select-content">
+      <div class="select-head">
+        <h1 class="select-title">איך נמדוד נכון?</h1>
+        <p class="select-subtitle">בחרו איך ללמוד בחמש הדקות הבאות:</p>
+      </div>
+
+      <div class="option-cards" role="radiogroup" aria-label="בחרו דרך למידה">
+
+        <!-- Left option: listening/video (first child = LEFT in ltr flex) -->
+        <div class="option-card" role="radio" aria-checked="false" tabindex="0"
+             data-value="listening" aria-label="לצפות בסרטון"
+             onclick="selectOptionS4(this)">
+          <div class="option-card-img">
+            <img id="s4-img-listen" src="assets/img/character-1-Watching-Video.png" alt="דמות צופה בסרטון">
+          </div>
+          <div class="option-card-labels">
+            <span class="option-card-name">לצפות בסרטון</span>
+          </div>
+        </div>
+
+        <!-- Right option: cards (second child = RIGHT in ltr flex) -->
+        <div class="option-card" role="radio" aria-checked="false" tabindex="0"
+             data-value="cards" aria-label="להפוך קלפים"
+             onclick="selectOptionS4(this)">
+          <div class="option-card-img">
+            <img id="s4-img-cards" src="assets/img/character-1-cards.png" alt="דמות עם קלפים">
+          </div>
+          <div class="option-card-labels">
+            <span class="option-card-name">להפוך קלפים</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Continue button: visible immediately, disabled until a selection is made. -->
+    <button class="btn-continue" id="s4-continue" disabled onclick="advanceFromS4()">בחרתי</button>
+    <!-- Back button: visible because this is not the first screen. -->
+    <button class="scq-back" id="s4-back" type="button" onclick="goBack()">חזרה</button>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       Screen 06 — Video path (S5, data-screen="5")
+       Template: VideoWatchAndContinue
+       Source: Figma dpY9DTl41tzW8SKvcPWU0C nodes 2199:4655 (State 01) / 2199:4670 (State 04)
+       Two states: before interaction (continue disabled) → video ended (continue enabled).
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="5" id="s5">
+
+    <div class="vpv-content">
+
+      <div class="vpv-text">
+
+        <div class="vpv-header">
+          <h1 class="vpv-title">אז איך נמדוד נכון?</h1>
+          <p class="vpv-subtitle">האזינו לשיחה בין דר' אושרית ואביתר הסטודנט</p>
+        </div>
+
+        <!--
+          PathToggle — reusable component candidate.
+          TODO: If this toggle pattern appears on other screens, document it in
+          720-templates/references/_global-components.md as "PathToggle".
+          Icons/visuals match Figma "Mode Buttons" (node 275:11947).
+          Layout: "לצפות בסרטון" (play) on the LEFT, "להפוך קלפים" (file) on the RIGHT.
+          RTL flex → first child = RIGHT, so cards is first; listening (active) is last = LEFT.
+          Each button carries two icon SVGs: .vpv-icon-on (filled, shown when active)
+          and .vpv-icon-off (white outline, shown when inactive).
+        -->
+        <div class="vpv-toggle" role="tablist" aria-label="בחרו דרך למידה">
+          <span class="vpv-toggle-pill" aria-hidden="true"></span>
+
+          <!-- Cards tab: inactive, first child = RIGHT in RTL -->
+          <button class="vpv-toggle-btn"
+                  id="vpv-tab-cards"
+                  role="tab" aria-selected="false"
+                  onclick="vpvSwitchTab('cards')">
+            <svg class="vpv-tab-icon vpv-icon-on" width="26" height="26" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+              <path d="M8.38776 3H21.6122C22.9309 3 24 4.06903 24 5.38775V26.8776H6V5.38775C6 4.06903 7.06903 3 8.38776 3Z" fill="currentColor"/>
+              <rect x="10.2246" y="7.22449" width="9.551" height="1.469" fill="#fff" stroke="#fff"/>
+              <rect x="10.2246" y="12.3675" width="9.551" height="1.469" fill="#fff" stroke="#fff"/>
+              <rect x="13.8979" y="17.5102" width="5.878" height="1.469" fill="#fff" stroke="#fff"/>
+            </svg>
+            <svg class="vpv-tab-icon vpv-icon-off" width="26" height="26" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+              <path d="M8.38776 3H21.6122C22.9309 3 24 4.06903 24 5.38775V26.8776H6V5.38775C6 4.06903 7.06903 3 8.38776 3Z" fill="none" stroke="#fff" stroke-width="1.5"/>
+              <rect x="10.2246" y="7.22449" width="9.551" height="1.469" fill="#fff" stroke="#fff"/>
+              <rect x="10.2246" y="12.3675" width="9.551" height="1.469" fill="#fff" stroke="#fff"/>
+              <rect x="13.8979" y="17.5102" width="5.878" height="1.469" fill="#fff" stroke="#fff"/>
+            </svg>
+            <span>להפוך קלפים</span>
+          </button>
+
+          <!-- Listen tab: ACTIVE by default, last child = LEFT in RTL -->
+          <button class="vpv-toggle-btn vpv-toggle-btn--active"
+                  id="vpv-tab-listen"
+                  role="tab" aria-selected="true"
+                  onclick="vpvSwitchTab('listen')">
+            <svg class="vpv-tab-icon vpv-icon-on" width="26" height="26" viewBox="0 0 29 29" fill="none" aria-hidden="true">
+              <circle cx="14.48" cy="14.48" r="10.66" fill="currentColor"/>
+              <path d="M11.5004 20.3467C10.9778 20.3467 10.5527 19.9216 10.5527 19.399V9.55945C10.5527 9.03682 10.9778 8.61176 11.5004 8.61176C11.6659 8.61176 11.8247 8.6548 11.972 8.73994L20.4933 13.6599C20.7896 13.8308 20.9665 14.1372 20.9665 14.4794C20.9665 14.8215 20.7896 15.128 20.4933 15.2989L11.972 20.2188C11.8247 20.3039 11.6659 20.347 11.5004 20.347V20.3467Z" fill="#fff"/>
+            </svg>
+            <svg class="vpv-tab-icon vpv-icon-off" width="26" height="26" viewBox="0 0 29 29" fill="none" aria-hidden="true">
+              <circle cx="14.48" cy="14.48" r="10.66" fill="none" stroke="#fff" stroke-width="1.1"/>
+              <path d="M11.5004 20.3467C10.9778 20.3467 10.5527 19.9216 10.5527 19.399V9.55945C10.5527 9.03682 10.9778 8.61176 11.5004 8.61176C11.6659 8.61176 11.8247 8.6548 11.972 8.73994L20.4933 13.6599C20.7896 13.8308 20.9665 14.1372 20.9665 14.4794C20.9665 14.8215 20.7896 15.128 20.4933 15.2989L11.972 20.2188C11.8247 20.3039 11.6659 20.347 11.5004 20.347V20.3467Z" fill="#fff"/>
+            </svg>
+            <span>לצפות בסרטון</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!--
+        Video — YouTube embed, 646×363 px frame, border-radius 16px.
+        Source: https://www.youtube.com/watch?v=vCb8nZt_Pts
+        The YouTube IFrame Player API (see main.js → "S5 YouTube video") replaces
+        the #vpv-youtube-player div with the player iframe and unlocks the Continue
+        button when the player fires its ENDED state.
+      -->
+      <div class="vpv-video-wrap" id="vpv-video-wrap">
+        <div id="vpv-youtube-player"></div>
+      </div>
+
+    </div>
+
+    <button class="btn-continue" id="s5-continue" disabled onclick="advanceFromS5()">להמשיך?</button>
+    <button class="scq-back" id="s5-back" type="button" onclick="goBack()">חזרה</button>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S20 — SingleChoiceQuestion "רגע לפני שנמשיך לצפות בסרטון"
+       Source: producer PPT "שקף לקלוד1.pptx" (presenter notes).
+       Flow: S5 (video 1) → S20 (this question) → S21 (video 2) → S7.
+       data-screen="20" (appended; the lomda's flow is wired explicitly,
+       not by numeric order). No hint. Single attempt: wrong on the 1st
+       try reveals the correct answer and locks the question.
+       No content image — single right-aligned column.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="20" id="s20">
+
+    <div class="scq-question">
+      <div class="scq-qtext">
+        <p class="s9q-qtitle">רגע לפני שנמשיך לצפות בסרטון</p>
+        <p class="s9q-qbody">מדוע ד"ר אושרית אמרה שחשוב תמיד לכתוב את היחידה לצד המספר?</p>
+      </div>
+
+      <div class="scq-answers" id="s20q-answers" role="radiogroup"
+           aria-label="מדוע ד&quot;ר אושרית אמרה שחשוב תמיד לכתוב את היחידה לצד המספר?">
+        <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                data-id="a" onclick="s20qSelect('a')">
+          <span class="scq-opt-text">כי כך קל יותר לזהות חריגות במדידה</span>
+          <span class="scq-radio" aria-hidden="true"></span>
+        </button>
+        <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                data-id="b" onclick="s20qSelect('b')">
+          <span class="scq-opt-text">כי בלי יחידה אי אפשר לחשב ממוצע של מדידות חוזרות</span>
+          <span class="scq-radio" aria-hidden="true"></span>
+        </button>
+        <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                data-id="c" onclick="s20qSelect('c')">
+          <span class="scq-opt-text">כי מספר ללא יחידה הוא חסר משמעות מבחינה מדעית</span>
+          <span class="scq-radio" aria-hidden="true"></span>
+        </button>
+        <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                data-id="d" onclick="s20qSelect('d')">
+          <span class="scq-opt-text">לפי היחידה נדע אם צריך לאפס את המאזניים לפני המדידה הבאה</span>
+          <span class="scq-radio" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom action bar — no hint button (producer: "אין רמז") -->
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s20q-check" type="button" disabled
+                onclick="s20qCheck()">צדקתי?</button>
+      </div>
+      <button class="scq-back" id="s20-back" type="button" onclick="goTo(5)">חזרה</button>
+    </div>
+
+  </section>
+
+  <!-- S20 feedback popup — outside .screen so display:none never hides it -->
+  <div class="scq-popup hidden" id="s20q-popup"
+       onpointerdown="s20qPopupMouseDown(event)"
+       role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button"
+              onclick="s20qClosePopup()" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="s20q-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="s20q-popup-body"></div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S21 — VideoWatchAndContinue (second video)
+       Producer PPT notes: "מסך סרטון נוסף זהה למסך הסרטון הקודם" with
+       https://www.youtube.com/watch?v=YvJEfU7egRc — same layout as S5
+       but without the PathToggle (switching to the cards path mid-flow
+       would break the S20→S21→S7 sequence). Continue label "שנמשיך?"
+       unlocks when the video ends, then advances to S7.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="21" id="s21">
+
+    <div class="vpv-content">
+
+      <div class="vpv-text">
+        <div class="vpv-header">
+          <h1 class="vpv-title">אז איך נמדוד נכון?</h1>
+          <p class="vpv-subtitle">האזינו לשיחה בין דר' אושרית ואביתר הסטודנט</p>
+        </div>
+
+        <!-- PathToggle — same component as S5; cards tab routes to S6. -->
+        <div class="vpv-toggle" role="tablist" aria-label="בחרו דרך למידה">
+          <span class="vpv-toggle-pill" aria-hidden="true"></span>
+
+          <!-- Cards tab: inactive, first child = RIGHT in RTL -->
+          <button class="vpv-toggle-btn"
+                  id="vpv2-tab-cards"
+                  role="tab" aria-selected="false"
+                  onclick="s21SwitchTab('cards')">
+            <svg class="vpv-tab-icon vpv-icon-on" width="26" height="26" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+              <path d="M8.38776 3H21.6122C22.9309 3 24 4.06903 24 5.38775V26.8776H6V5.38775C6 4.06903 7.06903 3 8.38776 3Z" fill="currentColor"/>
+              <rect x="10.2246" y="7.22449" width="9.551" height="1.469" fill="#fff" stroke="#fff"/>
+              <rect x="10.2246" y="12.3675" width="9.551" height="1.469" fill="#fff" stroke="#fff"/>
+              <rect x="13.8979" y="17.5102" width="5.878" height="1.469" fill="#fff" stroke="#fff"/>
+            </svg>
+            <svg class="vpv-tab-icon vpv-icon-off" width="26" height="26" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+              <path d="M8.38776 3H21.6122C22.9309 3 24 4.06903 24 5.38775V26.8776H6V5.38775C6 4.06903 7.06903 3 8.38776 3Z" fill="none" stroke="#fff" stroke-width="1.5"/>
+              <rect x="10.2246" y="7.22449" width="9.551" height="1.469" fill="#fff" stroke="#fff"/>
+              <rect x="10.2246" y="12.3675" width="9.551" height="1.469" fill="#fff" stroke="#fff"/>
+              <rect x="13.8979" y="17.5102" width="5.878" height="1.469" fill="#fff" stroke="#fff"/>
+            </svg>
+            <span>להפוך קלפים</span>
+          </button>
+
+          <!-- Listen tab: ACTIVE, last child = LEFT in RTL -->
+          <button class="vpv-toggle-btn vpv-toggle-btn--active"
+                  id="vpv2-tab-listen"
+                  role="tab" aria-selected="true"
+                  onclick="s21SwitchTab('listen')">
+            <svg class="vpv-tab-icon vpv-icon-on" width="26" height="26" viewBox="0 0 29 29" fill="none" aria-hidden="true">
+              <circle cx="14.48" cy="14.48" r="10.66" fill="currentColor"/>
+              <path d="M11.5004 20.3467C10.9778 20.3467 10.5527 19.9216 10.5527 19.399V9.55945C10.5527 9.03682 10.9778 8.61176 11.5004 8.61176C11.6659 8.61176 11.8247 8.6548 11.972 8.73994L20.4933 13.6599C20.7896 13.8308 20.9665 14.1372 20.9665 14.4794C20.9665 14.8215 20.7896 15.128 20.4933 15.2989L11.972 20.2188C11.8247 20.3039 11.6659 20.347 11.5004 20.347V20.3467Z" fill="#fff"/>
+            </svg>
+            <svg class="vpv-tab-icon vpv-icon-off" width="26" height="26" viewBox="0 0 29 29" fill="none" aria-hidden="true">
+              <circle cx="14.48" cy="14.48" r="10.66" fill="none" stroke="#fff" stroke-width="1.1"/>
+              <path d="M11.5004 20.3467C10.9778 20.3467 10.5527 19.9216 10.5527 19.399V9.55945C10.5527 9.03682 10.9778 8.61176 11.5004 8.61176C11.6659 8.61176 11.8247 8.6548 11.972 8.73994L20.4933 13.6599C20.7896 13.8308 20.9665 14.1372 20.9665 14.4794C20.9665 14.8215 20.7896 15.128 20.4933 15.2989L11.972 20.2188C11.8247 20.3039 11.6659 20.347 11.5004 20.347V20.3467Z" fill="#fff"/>
+            </svg>
+            <span>לצפות בסרטון</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- YouTube embed — https://www.youtube.com/watch?v=YvJEfU7egRc
+           Same IFrame-API pattern as S5 (see main.js → "S21 YouTube video"). -->
+      <div class="vpv-video-wrap" id="vpv2-video-wrap">
+        <div id="vpv2-youtube-player"></div>
+      </div>
+
+    </div>
+
+    <button class="btn-continue" id="s21-continue" disabled onclick="advanceFromS21()">שנמשיך?</button>
+    <button class="scq-back" id="s21-back" type="button" onclick="goTo(20)">חזרה</button>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       Screen 07 — FlipCards learning path (S6, data-screen="6")
+       Source: Figma dpY9DTl41tzW8SKvcPWU0C nodes 2199:4640 / 2199:4625
+       4 × 283×283 cards. Click to reveal. All 4 revealed → continue enabled.
+       State 01: all closed, continue disabled.
+       State 02: all 4 revealed at least once, continue enabled.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="6" id="s6">
+
+    <div class="vpv-content fpc-content">
+
+      <div class="vpv-text">
+
+        <div class="vpv-header">
+          <h1 class="vpv-title">אז איך נמדוד נכון?</h1>
+          <p class="vpv-subtitle">לחצו על הקלפים</p>
+        </div>
+
+        <!-- PathToggle — cards mode active. Icons/visuals match Figma node 275:11947.
+             Layout: "לצפות בסרטון" (play) LEFT, "להפוך קלפים" (file) RIGHT.
+             RTL flex → first child = RIGHT, so cards (active) is first; listening is last = LEFT. -->
+        <div class="vpv-toggle" role="tablist" aria-label="בחרו דרך למידה">
+          <span class="vpv-toggle-pill" aria-hidden="true"></span>
+
+          <!-- Cards tab: ACTIVE, first child = RIGHT in RTL -->
+          <button class="vpv-toggle-btn vpv-toggle-btn--active"
+                  id="fpc-tab-cards"
+                  role="tab" aria-selected="true"
+                  onclick="fpcSwitchTab('cards')">
+            <svg class="vpv-tab-icon vpv-icon-on" width="26" height="26" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+              <path d="M8.38776 3H21.6122C22.9309 3 24 4.06903 24 5.38775V26.8776H6V5.38775C6 4.06903 7.06903 3 8.38776 3Z" fill="currentColor"/>
+              <rect x="10.2246" y="7.22449" width="9.551" height="1.469" fill="#fff" stroke="#fff"/>
+              <rect x="10.2246" y="12.3675" width="9.551" height="1.469" fill="#fff" stroke="#fff"/>
+              <rect x="13.8979" y="17.5102" width="5.878" height="1.469" fill="#fff" stroke="#fff"/>
+            </svg>
+            <svg class="vpv-tab-icon vpv-icon-off" width="26" height="26" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+              <path d="M8.38776 3H21.6122C22.9309 3 24 4.06903 24 5.38775V26.8776H6V5.38775C6 4.06903 7.06903 3 8.38776 3Z" fill="none" stroke="#fff" stroke-width="1.5"/>
+              <rect x="10.2246" y="7.22449" width="9.551" height="1.469" fill="#fff" stroke="#fff"/>
+              <rect x="10.2246" y="12.3675" width="9.551" height="1.469" fill="#fff" stroke="#fff"/>
+              <rect x="13.8979" y="17.5102" width="5.878" height="1.469" fill="#fff" stroke="#fff"/>
+            </svg>
+            <span>להפוך קלפים</span>
+          </button>
+
+          <!-- Listen tab: inactive, last child = LEFT in RTL -->
+          <button class="vpv-toggle-btn"
+                  id="fpc-tab-listen"
+                  role="tab" aria-selected="false"
+                  onclick="fpcSwitchTab('listen')">
+            <svg class="vpv-tab-icon vpv-icon-on" width="26" height="26" viewBox="0 0 29 29" fill="none" aria-hidden="true">
+              <circle cx="14.48" cy="14.48" r="10.66" fill="currentColor"/>
+              <path d="M11.5004 20.3467C10.9778 20.3467 10.5527 19.9216 10.5527 19.399V9.55945C10.5527 9.03682 10.9778 8.61176 11.5004 8.61176C11.6659 8.61176 11.8247 8.6548 11.972 8.73994L20.4933 13.6599C20.7896 13.8308 20.9665 14.1372 20.9665 14.4794C20.9665 14.8215 20.7896 15.128 20.4933 15.2989L11.972 20.2188C11.8247 20.3039 11.6659 20.347 11.5004 20.347V20.3467Z" fill="#fff"/>
+            </svg>
+            <svg class="vpv-tab-icon vpv-icon-off" width="26" height="26" viewBox="0 0 29 29" fill="none" aria-hidden="true">
+              <circle cx="14.48" cy="14.48" r="10.66" fill="none" stroke="#fff" stroke-width="1.1"/>
+              <path d="M11.5004 20.3467C10.9778 20.3467 10.5527 19.9216 10.5527 19.399V9.55945C10.5527 9.03682 10.9778 8.61176 11.5004 8.61176C11.6659 8.61176 11.8247 8.6548 11.972 8.73994L20.4933 13.6599C20.7896 13.8308 20.9665 14.1372 20.9665 14.4794C20.9665 14.8215 20.7896 15.128 20.4933 15.2989L11.972 20.2188C11.8247 20.3039 11.6659 20.347 11.5004 20.347V20.3467Z" fill="#fff"/>
+            </svg>
+            <span>לצפות בסרטון</span>
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- Cards grid: direction:rtl → Card 1 (first child) appears on the RIGHT -->
+      <div class="fpc-cards" id="fpc-cards">
+
+        <!-- Card 1: Digital-Weight-Icon — zeroing the scale -->
+        <div class="fpc-card" onclick="fpcFlip(this,1)" tabindex="0" role="button" aria-label="קלף 1, לחץ לגלות">
+          <div class="fpc-inner">
+            <div class="fpc-front">
+              <div class="fpc-img-slot">
+                <img src="assets/img/Digital-Weight-Icon.png" alt="מאזניים דיגיטליים">
+              </div>
+            </div>
+            <div class="fpc-back">
+              <div class="fpc-back-text" dir="rtl">
+                <p>לפני תחילת המדידה</p>
+                <p><strong>נבדוק שהמאזניים מאופסים.</strong></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Warning-Icon — outlier check -->
+        <div class="fpc-card" onclick="fpcFlip(this,2)" tabindex="0" role="button" aria-label="קלף 2, לחץ לגלות">
+          <div class="fpc-inner">
+            <div class="fpc-front">
+              <div class="fpc-img-slot">
+                <img src="assets/img/Warning-Icon.png" alt="סמל אזהרה">
+              </div>
+            </div>
+            <div class="fpc-back">
+              <div class="fpc-back-text" dir="rtl">
+                <p><strong>נבדוק תוצאות חריגות.</strong></p>
+                <p>אם אחת התוצאות שונה בצורה משמעותית מהאחרות — נבדוק האם הייתה טעות במדידה.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Cycle-Icon — repeat measurements -->
+        <div class="fpc-card" onclick="fpcFlip(this,3)" tabindex="0" role="button" aria-label="קלף 3, לחץ לגלות">
+          <div class="fpc-inner">
+            <div class="fpc-front">
+              <div class="fpc-img-slot">
+                <img src="assets/img/Cycle-Icon.png" alt="סמל מחזוריות">
+              </div>
+            </div>
+            <div class="fpc-back">
+              <div class="fpc-back-text" dir="rtl">
+                <p>לא נסתפק במדידה אחת,</p>
+                <p><strong>נבצע כמה חזרות ונשווה ביניהן.</strong></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: KG-Icon — units of measurement -->
+        <div class="fpc-card" onclick="fpcFlip(this,4)" tabindex="0" role="button" aria-label="קלף 4, לחץ לגלות">
+          <div class="fpc-inner">
+            <div class="fpc-front">
+              <div class="fpc-img-slot">
+                <img src="assets/img/KG-Icon.png" alt="סמל קילוגרם">
+              </div>
+            </div>
+            <div class="fpc-back">
+              <div class="fpc-back-text" dir="rtl">
+                <p>היחידות המקובלות למדידת מסה במעבדה הן <strong>גרם (g) או קילוגרם (kg).</strong></p>
+                <p>כאשר נמדוד כמויות קטנות ומדויקות של חומרים נוזליים או מוצקים, נשתמש לרוב <strong>במיליגרם (mg).</strong></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <button class="btn-continue" id="s6-continue" disabled onclick="advanceFromS6()">להמשיך?</button>
+    <button class="scq-back" id="s6-back" type="button" onclick="goBack()">חזרה</button>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       Screen 08 — TransitionScreen (S7, data-screen="7")
+       Figma: dpY9DTl41tzW8SKvcPWU0C node 2218:4662
+       Companion character video plays automatically on entry.
+       Back routes to S5 (cards path) or S6 (listening path)
+       based on lomdaState.selectedLearningStyle.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="7" id="s7">
+
+    <div class="s7-content">
+      <div class="s7-text">
+        <h1 class="s7-title">מה נשאר לנו בראש?</h1>
+        <p class="s7-subtitle">שתי שאלות חימום קלילות לפני שנתקדם</p>
+      </div>
+      <div class="s7-video-wrap">
+        <video id="s7-video" class="s7-video" autoplay muted playsinline></video>
+      </div>
+    </div>
+
+    <button class="btn-continue" id="s7-continue" onclick="advanceFromS7()">קחו אותי לשאלות</button>
+    <button class="scq-back" id="s7-back" type="button" onclick="goBackFromS7()">חזרה</button>
+
+  </section>
+
+
+  <!-- S8 — Screen 09 · DropdownQuestion Multiple Blanks -->
+  <section class="screen" data-screen="8" id="s8">
+
+    <!-- Decorative image (left) — same framed-card look and zoom button
+         as the S1/S9 question images -->
+    <div class="scq-img mdq-decor">
+      <div class="scq-img-inner">
+        <button class="img-zoom-btn" type="button" aria-label="הגדלת התמונה"
+                data-zoom-src="assets/img/DecorativeWeightImage.png"
+                data-zoom-alt="קערת מלח על מאזניים דיגיטליים המציגים 150 גרם">
+          <svg class="img-zoom-btn__icon" aria-hidden="true" width="20" height="20" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1C11.8661 1 15 4.13371 15 7.99902C15 11.8643 11.8661 14.998 8 14.998C4.1339 14.998 1.00002 11.8643 1 7.99902C1 4.13371 4.13389 1 8 1Z" stroke="currentColor" stroke-width="2"/><path d="M12.6221 14.188L14.2657 12.6141L19.928 18.5274C20.3626 18.9813 20.347 19.7016 19.8931 20.1362C19.4392 20.5708 18.7189 20.5552 18.2843 20.1013L12.6221 14.188Z" fill="currentColor"/></svg>
+        </button>
+        <img src="assets/img/DecorativeWeightImage.png"
+             alt="קערת מלח על מאזניים דיגיטליים המציגים 150 גרם"
+             onerror="this.style.display='none'">
+      </div>
+    </div>
+
+    <div class="mdq-content">
+      <h1 class="mdq-title">יחידות מידה של מסה</h1>
+      <p class="mdq-instruction">השלימו את המשפט הבא:</p>
+
+      <!-- Row 1: "היחידות המקובלות למדידת מסה במעבדה הן [dd1] (g)" -->
+      <!-- RTL flex: first child = rightmost -->
+      <div class="mdq-fill-row">
+        <span class="mdq-word">היחידות המקובלות למדידת מסה במעבדה הן</span>
+        <div class="mdq-dropdown-wrap" id="mdq-wrap-1">
+          <button class="mdq-btn" id="mdq-btn-1" type="button"
+                  data-empty="true" aria-haspopup="listbox" aria-expanded="false"
+                  onclick="mdqToggle(1)">
+            <svg class="mdq-chevron" width="16" height="8" viewBox="0 0 16 8" fill="none" aria-hidden="true">
+              <path d="M1 1L8 7L15 1" stroke="#AEAEAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="mdq-selected" id="mdq-selected-1">בחרו תשובה</span>
+          </button>
+          <ul class="mdq-list hidden" id="mdq-list-1" role="listbox">
+            <li class="mdq-option" role="option" tabindex="0" onclick="mdqSelect(1,'גרם')">גרם</li>
+            <li class="mdq-option" role="option" tabindex="0" onclick="mdqSelect(1,'קילוגרם')">קילוגרם</li>
+            <li class="mdq-option" role="option" tabindex="0" onclick="mdqSelect(1,'מיליגרם')">מיליגרם</li>
+          </ul>
+        </div>
+        <span class="mdq-word" dir="ltr">(g)</span>
+      </div>
+
+      <!-- Row 2: "או [dd2] .(kg)" -->
+      <div class="mdq-fill-row">
+        <span class="mdq-word">או</span>
+        <div class="mdq-dropdown-wrap" id="mdq-wrap-2">
+          <button class="mdq-btn" id="mdq-btn-2" type="button"
+                  data-empty="true" aria-haspopup="listbox" aria-expanded="false"
+                  onclick="mdqToggle(2)">
+            <svg class="mdq-chevron" width="16" height="8" viewBox="0 0 16 8" fill="none" aria-hidden="true">
+              <path d="M1 1L8 7L15 1" stroke="#AEAEAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="mdq-selected" id="mdq-selected-2">בחרו תשובה</span>
+          </button>
+          <ul class="mdq-list hidden" id="mdq-list-2" role="listbox">
+            <li class="mdq-option" role="option" tabindex="0" onclick="mdqSelect(2,'גרם')">גרם</li>
+            <li class="mdq-option" role="option" tabindex="0" onclick="mdqSelect(2,'קילוגרם')">קילוגרם</li>
+            <li class="mdq-option" role="option" tabindex="0" onclick="mdqSelect(2,'מיליגרם')">מיליגרם</li>
+          </ul>
+        </div>
+        <span class="mdq-word" dir="ltr">.(kg)</span>
+      </div>
+
+      <!-- Row 3: plain text, no dropdown -->
+      <p class="mdq-plain-text">כאשר נמדוד כמויות קטנות ומדויקות של חומרים נוזליים, מוצקים או גזים,</p>
+
+      <!-- Row 4: "נשתמש לרוב ביחידת ה- [dd3] (אלפית הגרם)." -->
+      <div class="mdq-fill-row">
+        <span class="mdq-word">נשתמש לרוב ביחידת ה-</span>
+        <div class="mdq-dropdown-wrap" id="mdq-wrap-3">
+          <button class="mdq-btn" id="mdq-btn-3" type="button"
+                  data-empty="true" aria-haspopup="listbox" aria-expanded="false"
+                  onclick="mdqToggle(3)">
+            <svg class="mdq-chevron" width="16" height="8" viewBox="0 0 16 8" fill="none" aria-hidden="true">
+              <path d="M1 1L8 7L15 1" stroke="#AEAEAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="mdq-selected" id="mdq-selected-3">בחרו תשובה</span>
+          </button>
+          <ul class="mdq-list hidden" id="mdq-list-3" role="listbox">
+            <li class="mdq-option" role="option" tabindex="0" onclick="mdqSelect(3,'גרם')">גרם</li>
+            <li class="mdq-option" role="option" tabindex="0" onclick="mdqSelect(3,'קילוגרם')">קילוגרם</li>
+            <li class="mdq-option" role="option" tabindex="0" onclick="mdqSelect(3,'מיליגרם')">מיליגרם</li>
+          </ul>
+        </div>
+        <span class="mdq-word">(אלפית הגרם).</span>
+      </div>
+    </div>
+
+    <!-- Bottom action bar -->
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="mdq-check" type="button" disabled
+                onclick="mdqCheck()">צדקתי?</button>
+        <button class="scq-hint" id="mdq-hint" type="button" onclick="mdqOpenHint()">
+          <span>אפשר רמז?</span>
+          <img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt="">
+        </button>
+      </div>
+      <button class="scq-back" id="s8-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+
+  </section>
+
+  <!-- S8 (MDQ) feedback popup — outside .screen so display:none never hides it -->
+  <div class="scq-popup hidden" id="mdq-popup"
+       onpointerdown="mdqPopupMouseDown(event)"
+       role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button"
+              onclick="mdqClosePopup()" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="mdq-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="mdq-popup-body"></div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       Hint popup (modal) — lives OUTSIDE .screen divs, inside #app
+       so it is never clipped by a hidden screen.
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="scq-hint-overlay hidden" id="scq-hint-overlay"
+       onclick="scqCloseHintOnBackdrop(event)">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true"
+         aria-labelledby="scq-hint-title">
+      <div class="scq-hint-content">
+        <div class="scq-hint-text">
+          <h2 class="scq-hint-title" id="scq-hint-title">מה יש בתוך הבלון המנופח בכמות רבה יותר?</h2>
+          <div class="scq-hint-body">
+            <p>מה יש בתוך הבלון המנופח בכמות רבה יותר?</p>
+            <p>האם זה משפיע על המסה שלו?</p>
+            <p>*מסה היא כמות החומר שיש בגוף - לא משנה אם הוא מוצק, נוזל או גז.</p>
+          </div>
+        </div>
+        <img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt="">
+      </div>
+      <button class="scq-hint-close" type="button" onclick="scqCloseHint()">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       MDQ Hint popup — OUTSIDE .screen divs, inside #app.
+       Reuses .scq-hint-* CSS classes (identical blue-card design).
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="mdq-hint-overlay hidden" id="mdq-hint-overlay"
+       onclick="mdqCloseHintOnBackdrop(event)">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true"
+         aria-labelledby="mdq-hint-title">
+      <div class="scq-hint-content">
+        <div class="scq-hint-text">
+          <h2 class="scq-hint-title" id="mdq-hint-title">נסו להזכר</h2>
+          <div class="scq-hint-body">
+            <p>איזו יחידה מתאימה למדידות קטנות ומדויקות במעבדה, ואיזו לחפצים גדולים יותר.</p>
+          </div>
+        </div>
+        <img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt="">
+      </div>
+      <button class="scq-hint-close" type="button" onclick="mdqCloseHint()">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S9 — Screen 10 · SingleChoiceQuestionImage
+       Scientist image (left) + question title + body text + 4 options (right).
+       Bottom bar: צדקתי? / אפשר רמז? / חזרה.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="9" id="s9">
+
+    <div class="scq-question">
+      <!-- Image placeholder (left) -->
+      <div class="scq-img">
+        <div class="scq-img-inner">
+          <button class="img-zoom-btn" type="button" aria-label="הגדלת התמונה"
+                  data-zoom-src="assets/img/Scientist.jpg"
+                  data-zoom-alt="מדען עובד עם מאזניים דיגיטליים">
+            <svg class="img-zoom-btn__icon" aria-hidden="true" width="20" height="20" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1C11.8661 1 15 4.13371 15 7.99902C15 11.8643 11.8661 14.998 8 14.998C4.1339 14.998 1.00002 11.8643 1 7.99902C1 4.13371 4.13389 1 8 1Z" stroke="currentColor" stroke-width="2"/><path d="M12.6221 14.188L14.2657 12.6141L19.928 18.5274C20.3626 18.9813 20.347 19.7016 19.8931 20.1362C19.4392 20.5708 18.7189 20.5552 18.2843 20.1013L12.6221 14.188Z" fill="currentColor"/></svg>
+          </button>
+          <img src="assets/img/Scientist.jpg"
+               alt="מדען עובד עם מאזניים דיגיטליים"
+               onerror="this.style.display='none'">
+        </div>
+      </div>
+
+      <!-- Right column: title + body text stacked above answer options -->
+      <div class="s9q-right">
+        <div class="scq-qtext">
+          <p class="s9q-qtitle">מה מציגים המאזניים?</p>
+          <p class="s9q-qbody">דר' דסלין רצה למדוד מסה של נוזל רפואי.<br>
+            הוא הניח כוס ריקה על המאזניים הדיגיטליים , לחץ על כפתור האיפוס<br>
+            כך שהצג הראה 0.00, ומזג את הנוזל אל הכוס.<br>
+            מה מציגים המאזניים כעת?</p>
+        </div>
+
+        <div class="scq-answers" id="s9q-answers" role="radiogroup"
+           aria-label="מה מציגים המאזניים?">
+        <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                data-id="a" onclick="s9qSelect('a')">
+          <span class="scq-opt-text">את המסה המשולבת של הכוס והנוזל</span>
+          <span class="scq-radio" aria-hidden="true"></span>
+        </button>
+        <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                data-id="b" onclick="s9qSelect('b')">
+          <span class="scq-opt-text">רק את המסה של הנוזל</span>
+          <span class="scq-radio" aria-hidden="true"></span>
+        </button>
+        <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                data-id="c" onclick="s9qSelect('c')">
+          <span class="scq-opt-text">רק את המסה של הכוס הריקה</span>
+          <span class="scq-radio" aria-hidden="true"></span>
+        </button>
+        <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                data-id="d" onclick="s9qSelect('d')">
+          <span class="scq-opt-text">הבלון המנופח כבד יותר כי הוא לוחץ חזק יותר על הכף</span>
+          <span class="scq-radio" aria-hidden="true"></span>
+        </button>
+      </div>
+      </div><!-- /.s9q-right -->
+    </div><!-- /.scq-question -->
+
+    <!-- Bottom action bar -->
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s9q-check" type="button" disabled
+                onclick="s9qCheck()">צדקתי?</button>
+        <button class="scq-hint" id="s9q-hint" type="button" onclick="s9qOpenHint()">
+          <span>אפשר רמז?</span>
+          <img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt="">
+        </button>
+      </div>
+      <button class="scq-back" id="s9-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+
+  </section>
+
+  <!-- S9 feedback popup — outside .screen so display:none never hides it -->
+  <div class="scq-popup hidden" id="s9q-popup"
+       onpointerdown="s9qPopupMouseDown(event)"
+       role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button"
+              onclick="s9qClosePopup()" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="s9q-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="s9q-popup-body"></div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S10 — Screen 11 · TransitionScreen "תרגול סטנדרטי"
+       Same structure as S7. Text differs; video uses same assets.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="10" id="s10">
+
+    <div class="s10-content">
+      <div class="s10-text">
+        <p class="s10-subtitle">סיימנו את שלב הלימוד, נעבור לתרגול הראשון ונענה על</p>
+        <h1 class="s10-title">5 שאלות</h1>
+        <p class="s10-body">צריך לענות נכון על 4 שאלות (80%) לפחות.</p>
+      </div>
+      <div class="s10-video-wrap">
+        <video id="s10-video" class="s10-video" autoplay muted playsinline></video>
+      </div>
+
+    </div>
+
+    <button class="btn-continue" id="s10-continue" onclick="advanceFromS10()">המשך</button>
+    <button class="scq-back" id="s10-back" type="button" onclick="goBackFromS10()">חזרה</button>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S9Q Hint popup — OUTSIDE .screen divs, inside #app.
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="scq-hint-overlay hidden" id="s9q-hint-overlay"
+       onclick="s9qCloseHintOnBackdrop(event)">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true"
+         aria-labelledby="s9q-hint-title">
+      <div class="scq-hint-content">
+        <div class="scq-hint-text">
+          <h2 class="scq-hint-title" id="s9q-hint-title">חישבו:</h2>
+          <div class="scq-hint-body">
+            <p>מה קורה כשלוחצים על כפתור האיפוס כשהכוס הריקה כבר על המאזניים - מה המאזניים "שוכחים" ומה הם ממשיכים למדוד?</p>
+          </div>
+        </div>
+        <img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt="">
+      </div>
+      <button class="scq-hint-close" type="button" onclick="s9qCloseHint()">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       DDQ Feedback Popup — OUTSIDE all .screen divs, inside #app.
+       Floating, draggable, closable (X button).
+       Shown after ddqCheck(); closing does NOT reset answer state.
+       Background + title color set by JS per correct/incorrect.
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="ddq-popup hidden" id="ddq-popup"
+       onpointerdown="ddqPopupMouseDown(event)"
+       role="status" aria-live="polite">
+    <div class="ddq-popup-header">
+      <button class="ddq-popup-close" type="button"
+              onclick="ddqClosePopup()" aria-label="סגור">✕</button>
+      <p class="ddq-popup-title" id="ddq-popup-title"></p>
+    </div>
+    <div class="ddq-popup-body" id="ddq-popup-body"></div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S11 — Screen 12 · DragAndDropQuestion "תרגול סטנדרטי" Q1
+       Sequencing question: order the 4 steps of measuring mass.
+       2 attempts, hint hidden until attempt 1, locked on done.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="11" id="s11">
+
+    <!-- Progress Question nav — reusable component, Q1 first in DOM = physically RIGHT (RTL) -->
+    <nav class="progress-question" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon progress-question__icon--current"></div>
+        <span class="progress-question__label progress-question__label--visited">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 3</span>
+      </div>
+      <div class="progress-question__connector" data-connector="3"></div>
+      <div class="progress-question__item" data-question="4">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 4</span>
+      </div>
+      <div class="progress-question__connector" data-connector="4"></div>
+      <div class="progress-question__item" data-question="5">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 5</span>
+      </div>
+    </nav>
+
+    <!-- Question area -->
+    <div class="s11-question-area">
+      <h1 class="s11-title">ביצוע מדידת מסה של גוף מוצק במעבדה</h1>
+      <p class="s11-subtitle">סדרו את שלבי מדידת המסה של גוף מוצק במעבדה לפי הסדר הנכון.</p>
+
+      <!-- Main row: source tray (left) + numbered drop targets (right) -->
+      <div class="s11ddq-main-row">
+
+        <!-- Source tray -->
+        <div class="s11ddq-source" id="s11ddq-source">
+          <div class="s11ddq-source-slot">
+            <div class="s11ddq-drag-card" id="drag-s11-hasarat">
+              <span class="s11ddq-card-text">הסרת הגוף, וידוא איפוס, וביצוע חזרות נוספות.</span>
+            </div>
+          </div>
+          <div class="s11ddq-source-slot">
+            <div class="s11ddq-drag-card" id="drag-s11-bdika">
+              <span class="s11ddq-card-text">בדיקה שהמאזניים נקיים ומאופסים על הנתון 0.00.</span>
+            </div>
+          </div>
+          <div class="s11ddq-source-slot">
+            <div class="s11ddq-drag-card" id="drag-s11-kriat">
+              <span class="s11ddq-card-text">קריאת התוצאה ורישום שלה.</span>
+            </div>
+          </div>
+          <div class="s11ddq-source-slot">
+            <div class="s11ddq-drag-card" id="drag-s11-hanaha">
+              <span class="s11ddq-card-text">הנחת הגוף המוצק במרכז כפת המאזניים.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Numbered drop targets -->
+        <div class="s11ddq-targets-col">
+          <div class="s11ddq-target-row">
+            <div class="s11ddq-target" id="target-s11-1"></div>
+            <div class="s11ddq-num-badge">1</div>
+          </div>
+          <div class="s11ddq-target-row">
+            <div class="s11ddq-target" id="target-s11-2"></div>
+            <div class="s11ddq-num-badge">2</div>
+          </div>
+          <div class="s11ddq-target-row">
+            <div class="s11ddq-target" id="target-s11-3"></div>
+            <div class="s11ddq-num-badge">3</div>
+          </div>
+          <div class="s11ddq-target-row">
+            <div class="s11ddq-target" id="target-s11-4"></div>
+            <div class="s11ddq-num-badge">4</div>
+          </div>
+        </div>
+
+      </div><!-- /.s11ddq-main-row -->
+    </div><!-- /.s11-question-area -->
+
+    <!-- Bottom action bar -->
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s11ddq-check" type="button" disabled
+                onclick="s11ddqCheck()">צדקתי?</button>
+        <button class="scq-hint" id="s11ddq-hint" type="button"
+                style="visibility:hidden" onclick="s11ddqOpenHint()">
+          <span>אפשר רמז?</span>
+          <img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt="">
+        </button>
+      </div>
+      <button class="scq-back" id="s11-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S12 — Screen 13 · StandardPractice Q2 — SingleChoiceQuestion
+       "יושרה מדעית" — 3 options, speech bubbles, shared progress nav.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="12" id="s12">
+
+    <!-- Progress Question nav — reusable component, Q1 first in DOM = physically RIGHT (RTL) -->
+    <nav class="progress-question" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon progress-question__icon--current"></div>
+        <span class="progress-question__label progress-question__label--visited">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 3</span>
+      </div>
+      <div class="progress-question__connector" data-connector="3"></div>
+      <div class="progress-question__item" data-question="4">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 4</span>
+      </div>
+      <div class="progress-question__connector" data-connector="4"></div>
+      <div class="progress-question__item" data-question="5">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 5</span>
+      </div>
+    </nav>
+
+    <div class="scq-question">
+
+      <!-- Left column: image frame (bottom) + speech bubbles (absolute) -->
+      <div class="s12q-left">
+        <!-- Speech bubble A — Figma: left:8px top:-24px w:182px -->
+        <div class="speech-bubble" style="left:8px; top:-24px; width:182px;">
+          <div class="speech-bubble__frame">
+            <p class="speech-bubble__text">לפני חישוב הממוצע, נבדוק האם אחת התוצאות שונה מאוד מהאחרות כדי להשפיע על המסקנה.</p>
+          </div>
+          <div class="speech-bubble__tail"></div>
+        </div>
+        <!-- Speech bubble B — Figma: left:195px top:-30px w:166px -->
+        <div class="speech-bubble" style="left:195px; top:-30px; width:166px;">
+          <div class="speech-bubble__frame">
+            <p class="speech-bubble__text">נחשב ממוצע של שלוש המדידות (53&nbsp;גרם), ונרשום את זה בדו"ח.</p>
+          </div>
+          <div class="speech-bubble__tail"></div>
+        </div>
+        <!-- Image frame (Figma: 380×380, padding:8px, inner border r16) -->
+        <div class="s12q-frame">
+          <div class="s12q-frame-inner">
+            <button class="img-zoom-btn" type="button" aria-label="הגדלת התמונה"
+                    data-zoom-src="assets/img/AdamYael.png"
+                    data-zoom-alt="אדם ויעל מציגים את תוצאות המדידה">
+              <svg class="img-zoom-btn__icon" aria-hidden="true" width="20" height="20" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1C11.8661 1 15 4.13371 15 7.99902C15 11.8643 11.8661 14.998 8 14.998C4.1339 14.998 1.00002 11.8643 1 7.99902C1 4.13371 4.13389 1 8 1Z" stroke="currentColor" stroke-width="2"/><path d="M12.6221 14.188L14.2657 12.6141L19.928 18.5274C20.3626 18.9813 20.347 19.7016 19.8931 20.1362C19.4392 20.5708 18.7189 20.5552 18.2843 20.1013L12.6221 14.188Z" fill="currentColor"/></svg>
+            </button>
+            <img src="assets/img/AdamYael.png"
+                 alt="אדם ויעל"
+                 onerror="this.style.display='none'">
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column: title + body paragraphs + answers -->
+      <div class="s12q-right">
+        <div class="scq-qtext">
+          <p class="s12q-qtitle">יושרה מדעית</p>
+          <div class="s12q-qbody-group">
+            <p class="s12q-qbody">אדם ויעל מדדו 3 פעמים רכיב מוצק.<br>
+              הם קיבלו התוצאות הבאות: 51 גרם, 52 גרם, 56 גרם.</p>
+            <p class="s12q-qquestion">מי משניהם מציג עמדה מדעית (וערכית) נכונה?</p>
+          </div>
+        </div>
+
+        <div class="scq-answers" id="s12q-answers" role="radiogroup"
+             aria-label="מי משניהם מציג עמדה מדעית נכונה?">
+          <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                  data-id="a" onclick="s12qSelect('a')">
+            <span class="scq-opt-text"><strong>יעל צודקת</strong> – גם כאשר ההבדל אינו קיצוני מאוד, חשוב לבדוק האם הוא עלול להשפיע על איכות הנתונים.</span>
+            <span class="scq-radio" aria-hidden="true"></span>
+          </button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                  data-id="b" onclick="s12qSelect('b')">
+            <span class="scq-opt-text"><strong>אדם צודק</strong> – תמיד צריך לחשב ממוצע של כל המדידות.</span>
+            <span class="scq-radio" aria-hidden="true"></span>
+          </button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                  data-id="c" onclick="s12qSelect('c')">
+            <span class="scq-opt-text"><strong>יעל ואדם טועים.</strong> כשיש הבדל בין מדידות נשקול להחליף את מכשיר המדידה ולמדוד שוב.</span>
+            <span class="scq-radio" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /.scq-question -->
+
+    <!-- Bottom action bar -->
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s12q-check" type="button" disabled
+                onclick="s12qCheck()">צדקתי?</button>
+        <button class="scq-hint" id="s12q-hint" type="button"
+                style="visibility:hidden" onclick="s12qOpenHint()">
+          <span>אפשר רמז?</span>
+          <img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt="">
+        </button>
+      </div>
+      <button class="scq-back" id="s12-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+
+  </section>
+
+  <!-- S12 feedback popup — outside .screen so display:none never hides it -->
+  <div class="scq-popup hidden" id="s12q-popup"
+       onmousedown="s12qPopupMouseDown(event)"
+       role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button"
+              onclick="s12qClosePopup()" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="s12q-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="s12q-popup-body"></div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S13 — Screen 14 · StandardPractice Q3 Practice — MeasurementWidget
+       "מעבדת השקילה" — drag-to-scale, manual entry, 3 measurements.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="13" id="s13">
+
+    <!-- Progress Question nav -->
+    <nav class="progress-question" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 3</span>
+      </div>
+      <div class="progress-question__connector" data-connector="3"></div>
+      <div class="progress-question__item" data-question="4">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 4</span>
+      </div>
+      <div class="progress-question__connector" data-connector="4"></div>
+      <div class="progress-question__item" data-question="5">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 5</span>
+      </div>
+    </nav>
+
+    <!-- Main content area
+         RTL flex: first child → RIGHT, second child → LEFT.
+         Question col first (→ RIGHT), scale col second (→ LEFT) = Figma layout. -->
+    <div class="s13-content">
+
+      <!-- RIGHT column: question text + measurement input rows -->
+      <div class="s13-question-col">
+        <div class="s13-text-block">
+          <p class="s13-title">מעבדת השקילה – תרגול לקראת שאלה 3</p>
+          <p class="s13-body">בצעו את הפעולות לפי הסדר הנכון –</p>
+          <p class="s13-body">1. אפסו את המשקל<br>
+            2. הניחו את המשקולת על גבי המשקל<br>
+            3. רשמו את תוצאת המדידה</p>
+          <p class="s13-body"><strong>חזרו על סדר הפעולות פעמים 3.</strong></p>
+        </div>
+        <div class="s13-inputs-slot">
+          <div class="s13-row">
+            <span class="s13-word">מדידה 1</span>
+            <input id="s13-input-1" class="s13-input" type="number" inputmode="numeric"
+                   min="0" max="999" step="1" disabled dir="rtl"
+                   aria-label="מדידה 1"
+                   oninput="s13InputChange(1)">
+            <span class="s13-word">גר'</span>
+          </div>
+          <div class="s13-row">
+            <span class="s13-word">מדידה 2</span>
+            <input id="s13-input-2" class="s13-input" type="number" inputmode="numeric"
+                   min="0" max="999" step="1" disabled dir="rtl"
+                   aria-label="מדידה 2"
+                   oninput="s13InputChange(2)">
+            <span class="s13-word">גר'</span>
+          </div>
+          <div class="s13-row">
+            <span class="s13-word">מדידה 3</span>
+            <input id="s13-input-3" class="s13-input" type="number" inputmode="numeric"
+                   min="0" max="999" step="1" disabled dir="rtl"
+                   aria-label="מדידה 3"
+                   oninput="s13InputChange(3)">
+            <span class="s13-word">גר'</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEFT column: scale image + draggable weight tray -->
+      <div class="s13-scale-col" id="s13-scale-col">
+
+        <!-- Drop target covers the scale area -->
+        <div class="s13-drag-area"
+             ondragover="s13ScaleDragOver(event)"
+             ondrop="s13ScaleDrop(event)">
+          <!-- Scale background image (464px asset, positioned by Figma measurements) -->
+          <div class="s13-scale-bg-container">
+            <img class="s13-scale-bg-img" src="assets/img/s13-scale.png" alt="מאזניים">
+          </div>
+          <!-- Digital display (starts drifted at 00.02 — must be zeroed first) -->
+          <div id="s13-display" class="s13-display">00.02</div>
+          <!-- Reset button (image background + live text) -->
+          <button id="s13-reset-btn" class="s13-reset-btn" type="button"
+                  onclick="s13Reset()">
+            <img src="assets/img/s13-reset-btn.png" alt="" class="s13-reset-btn-bg">
+            <span>איפוס</span>
+          </button>
+        </div>
+
+        <!-- Tray: weight token lives here when not on scale -->
+        <div class="s13-tray" id="s13-tray">
+          <div class="s13-weight" id="s13-weight"
+               draggable="true"
+               ondragstart="s13WeightDragStart(event)">
+            <div class="s13-weight-inner">
+              <img src="assets/img/s13-weight.png" alt="משקולת 10 גרם">
+            </div>
+            <span class="s13-weight-label">10 גר'</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom action bar -->
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button id="s13-continue" class="s13-continue disabled" type="button"
+                onclick="if(!this.classList.contains('disabled')) goTo(14)">שנמשיך?</button>
+      </div>
+      <button class="scq-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S14 — Screen 15 · Q3 Practice — SingleChoice (text-only, no scoring)
+       1 attempt · no hint · Q3 stays current.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="14" id="s14">
+
+    <!-- Progress Question nav -->
+    <nav class="progress-question" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 3</span>
+      </div>
+      <div class="progress-question__connector" data-connector="3"></div>
+      <div class="progress-question__item" data-question="4">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 4</span>
+      </div>
+      <div class="progress-question__connector" data-connector="4"></div>
+      <div class="progress-question__item" data-question="5">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 5</span>
+      </div>
+    </nav>
+
+    <!-- Text-only question area -->
+    <div class="s14q-question">
+      <div class="s14q-qtext">
+        <p class="s14q-qtitle">מעבדת השקילה​ - תרגול לקראת שאלה 3</p>
+        <div class="s14q-qbody-group">
+          <p class="s14q-qbody">האם התקבלו תוצאות דומות מאוד זו לזו?</p>
+        </div>
+      </div>
+      <div class="scq-answers" id="s14q-answers" role="radiogroup"
+           aria-label="בחרו את התשובה הנכונה">
+        <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                data-id="a" onclick="s14qSelect('a')">
+          <span class="scq-opt-text">כן</span>
+          <span class="scq-radio" aria-hidden="true"></span>
+        </button>
+        <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                data-id="b" onclick="s14qSelect('b')">
+          <span class="scq-opt-text">לא</span>
+          <span class="scq-radio" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom action bar — no hint button -->
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s14q-check" type="button" disabled
+                onclick="s14qCheck()">מה זה אומר?</button>
+      </div>
+      <button class="scq-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S15 — Screen 16 · FlipCardsReveal (Q3 Practice)
+       Clone of S2 flip-card pattern. Two flip cards reveal content
+       on click; Continue unlocks after both are revealed.
+       Q3 stays 'current' — not scored here.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="15" id="s15">
+
+    <!-- Progress Question nav (6 questions — same as S13/S14) -->
+    <nav class="progress-question" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 3</span>
+      </div>
+      <div class="progress-question__connector" data-connector="3"></div>
+      <div class="progress-question__item" data-question="4">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 4</span>
+      </div>
+      <div class="progress-question__connector" data-connector="4"></div>
+      <div class="progress-question__item" data-question="5">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 5</span>
+      </div>
+    </nav>
+
+    <div class="select-content">
+      <div class="select-head">
+        <h1 class="select-title">בואו נכיר שני מושגים חדשים</h1>
+        <p class="select-subtitle">לחצו על הקלפים</p>
+      </div>
+
+      <div class="option-cards" role="group" aria-label="כרטיסיות — לחצו לגלות">
+
+        <!-- Card 0 — Replicability (מהימנות) -->
+        <div class="frc-cell">
+          <button
+            class="frc-card"
+            data-index="0"
+            data-base-label="כרטיסייה — מהימנות. לחצו להפוך"
+            type="button"
+            aria-expanded="false"
+            aria-label="כרטיסייה — מהימנות. לחצו להפוך"
+            onclick="s15frcFlip(this)"
+          >
+            <div class="frc-card-inner">
+              <div class="frc-card-front">
+                <img src="assets/img/Replicability.png" alt="מהימנות" onerror="this.style.display='none'">
+              </div>
+              <div class="frc-card-back" aria-hidden="true">
+                <div class="frc-card-back-content">
+                  <p>תוצאה הקרובה לערך האמיתי.</p>
+                </div>
+              </div>
+            </div>
+          </button>
+          <p class="frc-card-title">מהימנות</p>
+        </div>
+
+        <!-- Card 1 — Accuracy (דיוק) -->
+        <div class="frc-cell">
+          <button
+            class="frc-card"
+            data-index="1"
+            data-base-label="כרטיסייה — דיוק. לחצו להפוך"
+            type="button"
+            aria-expanded="false"
+            aria-label="כרטיסייה — דיוק. לחצו להפוך"
+            onclick="s15frcFlip(this)"
+          >
+            <div class="frc-card-inner">
+              <div class="frc-card-front">
+                <img src="assets/img/Accuracy.png" alt="דיוק" onerror="this.style.display='none'">
+              </div>
+              <div class="frc-card-back" aria-hidden="true">
+                <div class="frc-card-back-content">
+                  <p>תוצאות החוזרות על עצמן שוב ושוב.</p>
+                </div>
+              </div>
+            </div>
+          </button>
+          <p class="frc-card-title">דיוק</p>
+        </div>
+
+      </div>
+    </div>
+
+    <button class="btn-continue" id="s15-continue" disabled onclick="advanceFromS15()">שנמשיך?</button>
+    <button class="scq-back" id="s15-back" type="button" onclick="goBack()">חזרה</button>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S16 — Screen 17 · SCORED Question 3 — DragAndDropQuestion
+       Real scored Q3. 4 image draggables → 4 labeled drop targets.
+       Based on S3 (image DDQ) + S11 (scored, 2 attempts, progress nav).
+       On completion: marks standardPracticeProgress Q3 correct/incorrect.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="16" id="s16">
+
+    <!-- Progress Question nav — shared component, Q1 first in DOM = physically RIGHT (RTL) -->
+    <nav class="progress-question" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 3</span>
+      </div>
+      <div class="progress-question__connector" data-connector="3"></div>
+      <div class="progress-question__item" data-question="4">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 4</span>
+      </div>
+      <div class="progress-question__connector" data-connector="4"></div>
+      <div class="progress-question__item" data-question="5">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 5</span>
+      </div>
+    </nav>
+
+    <!-- Content block: header + fixed target images (each with a drop zone) + draggable text row -->
+    <div class="s16ddq-content">
+
+      <!-- Text header -->
+      <div class="s16ddq-header">
+        <p class="s16ddq-title">נענה על שאלה 3</p>
+        <p class="s16ddq-subtitle">לפניכם 4 מטרות קליעה. גררו לכל מטרה את התיאור המתאים ביותר:</p>
+      </div>
+
+      <!-- Targets row: 4 fixed images, each with a drop zone beneath -->
+      <div class="s16ddq-targets-row">
+
+        <div class="s16ddq-target-col">
+          <div class="s16ddq-img-frame">
+            <img class="s16ddq-target-img" src="assets/img/s16-target-1.png" alt="מטרה 1">
+          </div>
+          <div class="s16ddq-target" id="target-s16-1"></div>
+        </div>
+
+        <div class="s16ddq-target-col">
+          <div class="s16ddq-img-frame">
+            <img class="s16ddq-target-img" src="assets/img/s16-target-2.png" alt="מטרה 2">
+          </div>
+          <div class="s16ddq-target" id="target-s16-2"></div>
+        </div>
+
+        <div class="s16ddq-target-col">
+          <div class="s16ddq-img-frame">
+            <img class="s16ddq-target-img" src="assets/img/s16-target-3.png" alt="מטרה 3">
+          </div>
+          <div class="s16ddq-target" id="target-s16-3"></div>
+        </div>
+
+        <div class="s16ddq-target-col">
+          <div class="s16ddq-img-frame">
+            <img class="s16ddq-target-img" src="assets/img/s16-target-4.png" alt="מטרה 4">
+          </div>
+          <div class="s16ddq-target" id="target-s16-4"></div>
+        </div>
+
+      </div><!-- /.s16ddq-targets-row -->
+
+      <!-- Draggable text descriptions (shuffled). direction:ltr keeps physical order stable. -->
+      <div class="s16ddq-source" id="s16ddq-source">
+
+        <div class="s16ddq-source-slot">
+          <div class="s16ddq-drag-card" id="drag-s16-1">
+            <span class="s16ddq-card-text">לא מדויק ולא מהימן</span>
+          </div>
+        </div>
+
+        <div class="s16ddq-source-slot">
+          <div class="s16ddq-drag-card" id="drag-s16-2">
+            <span class="s16ddq-card-text">גם מדויק וגם מהימן</span>
+          </div>
+        </div>
+
+        <div class="s16ddq-source-slot">
+          <div class="s16ddq-drag-card" id="drag-s16-3">
+            <span class="s16ddq-card-text">מהימן אך לא מדויק</span>
+          </div>
+        </div>
+
+        <div class="s16ddq-source-slot">
+          <div class="s16ddq-drag-card" id="drag-s16-4">
+            <span class="s16ddq-card-text">מדויק אך לא מהימן</span>
+          </div>
+        </div>
+
+      </div><!-- /.s16ddq-source -->
+
+    </div><!-- /.s16ddq-content -->
+
+    <!-- Bottom action bar — צדקתי? (disabled until all 4 filled) · רמז (appears after a wrong answer) · חזרה -->
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s16ddq-check" type="button" disabled
+                onclick="s16ddqCheck()">צדקתי?</button>
+        <button class="scq-hint" id="s16ddq-hint" type="button"
+                style="visibility:hidden" onclick="s16ddqOpenHint()">
+          <span>אפשר רמז?</span>
+          <img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt="">
+        </button>
+      </div>
+      <button class="scq-back" id="s16-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S11 Hint overlay — OUTSIDE .screen divs, inside #app.
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="scq-hint-overlay hidden" id="s11ddq-hint-overlay"
+       onclick="s11ddqCloseHintOnBackdrop(event)">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true"
+         aria-labelledby="s11ddq-hint-title">
+      <div class="scq-hint-content">
+        <div class="scq-hint-text">
+          <h2 class="scq-hint-title" id="s11ddq-hint-title">הגיון פשוט יעזור</h2>
+          <div class="scq-hint-body">
+            <p>דמיינו את סדר הפעולות הנדרש בביצוע מספר מדידות.</p>
+          </div>
+        </div>
+        <img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt="">
+      </div>
+      <button class="scq-hint-close" type="button" onclick="s11ddqCloseHint()">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S11 Feedback Popup — OUTSIDE .screen divs, inside #app.
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="scq-popup hidden" id="s11ddq-popup"
+       onpointerdown="s11ddqPopupMouseDown(event)"
+       role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button"
+              onclick="s11ddqClosePopup()" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="s11ddq-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="s11ddq-popup-body"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S16 Feedback Popup — OUTSIDE .screen divs, inside #app.
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="scq-popup hidden" id="s16ddq-popup"
+       onmousedown="s16ddqPopupMouseDown(event)"
+       role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button"
+              onclick="s16ddqClosePopup()" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="s16ddq-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="s16ddq-popup-body"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S16 Hint overlay — OUTSIDE .screen divs, inside #app.
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="scq-hint-overlay hidden" id="s16ddq-hint-overlay"
+       onclick="s16ddqCloseHintOnBackdrop(event)">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true"
+         aria-labelledby="s16ddq-hint-title">
+      <div class="scq-hint-content">
+        <div class="scq-hint-text">
+          <h2 class="scq-hint-title" id="s16ddq-hint-title"><strong>עבור כל מטרה שאלו:</strong></h2>
+          <div class="scq-hint-body">
+            <p>האם החיצים צמודים זה לזה? אם כן – התוצאה <strong>מהימנה</strong>.</p>
+            <p>האם הם נמצאים במרכז? אם כן, התוצאה <strong>מדויקת</strong>.</p>
+          </div>
+        </div>
+        <img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt="">
+      </div>
+      <button class="scq-hint-close" type="button" onclick="s16ddqCloseHint()">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S17 — Screen 18 · StandardPractice Q4 — Scale recap + SingleChoiceQuestion
+       Disabled scale widget (left) + pre-filled measurements + radio question (right).
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="17" id="s17">
+
+    <!-- Progress Question nav -->
+    <nav class="progress-question" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 3</span>
+      </div>
+      <div class="progress-question__connector" data-connector="3"></div>
+      <div class="progress-question__item" data-question="4">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 4</span>
+      </div>
+      <div class="progress-question__connector" data-connector="4"></div>
+      <div class="progress-question__item" data-question="5">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 5</span>
+      </div>
+    </nav>
+
+    <!-- Main content: question col (RIGHT) + disabled scale widget (LEFT) -->
+    <div class="s17-content">
+
+      <!-- RIGHT column: recap text + measurements + single-choice question -->
+      <div class="s17q-right">
+
+        <div class="s17q-block">
+          <div class="s17q-textblock">
+            <p class="s17q-title">חזרנו אל יישומון השקילה</p>
+            <p class="s17q-subtitle">לפניכם המדידות שהתקבלו במהלך השקילה:</p>
+          </div>
+
+          <!-- Pre-filled, read-only measurements (RTL: מדידה N · box · גר') -->
+          <div class="s17q-measures">
+            <div class="s17q-measure">
+              <span class="s17q-mlabel">מדידה 1</span>
+              <span class="s17q-mbox">13</span>
+              <span class="s17q-munit">גר'</span>
+            </div>
+            <div class="s17q-measure">
+              <span class="s17q-mlabel">מדידה 2</span>
+              <span class="s17q-mbox">10</span>
+              <span class="s17q-munit">גר'</span>
+            </div>
+            <div class="s17q-measure">
+              <span class="s17q-mlabel">מדידה 3</span>
+              <span class="s17q-mbox">12</span>
+              <span class="s17q-munit">גר'</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="s17q-qblock">
+          <p class="s17q-question">מהו התיאור המתאים ביותר למדידות האלו?</p>
+          <div class="scq-answers" id="s17q-answers" role="radiogroup"
+               aria-label="מהו התיאור המתאים ביותר למדידות האלו?">
+            <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                    data-id="a" onclick="s17qSelect('a')">
+              <span class="scq-opt-text">מהימנות אך לא מדויקות</span>
+              <span class="scq-radio" aria-hidden="true"></span>
+            </button>
+            <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                    data-id="b" onclick="s17qSelect('b')">
+              <span class="scq-opt-text">מדויקות אך לא מהימנות</span>
+              <span class="scq-radio" aria-hidden="true"></span>
+            </button>
+            <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                    data-id="c" onclick="s17qSelect('c')">
+              <span class="scq-opt-text">גם מדויקות וגם מהימנות</span>
+              <span class="scq-radio" aria-hidden="true"></span>
+            </button>
+            <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                    data-id="d" onclick="s17qSelect('d')">
+              <span class="scq-opt-text">לא מדויקות ולא מהימנות</span>
+              <span class="scq-radio" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /.s17q-right -->
+
+      <!-- LEFT column: disabled scale widget (reuses S13 visuals, no interaction) -->
+      <div class="s13-scale-col s17-scale-col">
+        <div class="s13-drag-area">
+          <div class="s13-scale-bg-container">
+            <img class="s13-scale-bg-img" src="assets/img/s13-scale.png" alt="מאזניים">
+          </div>
+          <div class="s13-display">00.00</div>
+          <button class="s13-reset-btn" type="button" tabindex="-1" aria-hidden="true">
+            <img src="assets/img/s13-reset-btn.png" alt="" class="s13-reset-btn-bg">
+            <span>איפוס</span>
+          </button>
+        </div>
+        <div class="s13-tray">
+          <div class="s13-weight">
+            <div class="s13-weight-inner">
+              <img src="assets/img/s13-weight.png" alt="משקולת 10 גרם">
+            </div>
+            <span class="s13-weight-label">10 גר'</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.s17-content -->
+
+    <!-- Bottom action bar -->
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s17q-check" type="button" disabled
+                onclick="s17qCheck()">צדקתי?</button>
+        <button class="scq-hint" id="s17q-hint" type="button"
+                style="visibility:hidden" onclick="s17qOpenHint()">
+          <span>אפשר רמז?</span>
+          <img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt="">
+        </button>
+      </div>
+      <button class="scq-back" id="s17-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S17 Feedback Popup — OUTSIDE .screen divs, inside #app.
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="scq-popup hidden" id="s17q-popup"
+       onmousedown="s17qPopupMouseDown(event)"
+       role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button"
+              onclick="s17qClosePopup()" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="s17q-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="s17q-popup-body"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S17 Hint overlay — OUTSIDE .screen divs, inside #app.
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="scq-hint-overlay hidden" id="s17q-hint-overlay"
+       onclick="s17qCloseHintOnBackdrop(event)">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true"
+         aria-labelledby="s17q-hint-title">
+      <div class="scq-hint-content">
+        <div class="scq-hint-text">
+          <h2 class="scq-hint-title" id="s17q-hint-title"><strong>חישבו:</strong></h2>
+          <div class="scq-hint-body">
+            <p>האם התוצאות קרובות זו לזו? אם כן – התוצאות <strong>מהימנות</strong>.</p>
+            <p>האם התוצאות קרובות למשקל המשקולת? אם כן, התוצאה <strong>מדויקת</strong>.</p>
+          </div>
+        </div>
+        <img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt="">
+      </div>
+      <button class="scq-hint-close" type="button" onclick="s17qCloseHint()">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S18 — Screen 19 · StandardPractice Q5 — SingleChoiceQuestion
+       "ממוצע מדידות" — class average; correct = option 2 (50.0 גרם).
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="18" id="s18">
+
+    <!-- Progress Question nav -->
+    <nav class="progress-question" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 3</span>
+      </div>
+      <div class="progress-question__connector" data-connector="3"></div>
+      <div class="progress-question__item" data-question="4">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 4</span>
+      </div>
+      <div class="progress-question__connector" data-connector="4"></div>
+      <div class="progress-question__item" data-question="5">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 5</span>
+      </div>
+    </nav>
+
+    <!-- Question column (right-aligned) -->
+    <div class="s18q-content">
+      <div class="s18q-col">
+        <div class="s18q-text">
+          <p class="s18q-title">ממוצע מדידות</p>
+          <div class="s18q-bodygroup">
+            <p class="s18q-body">חמש קבוצות שונות במעבדה קיבלו משימה למדוד מסה של 50 גרם מים.<br>
+              התוצאות שדיווחו הקבוצות היו:  49.8 גרם, 50.1 גרם, 50.0 גרם, 49.9 גרם, 50.2 גרם.</p>
+            <p class="s18q-question">סעיף א: מהו הממוצע הכיתתי של המדידות?</p>
+          </div>
+        </div>
+
+        <div class="scq-answers" id="s18q-answers" role="radiogroup"
+             aria-label="מהו הממוצע הכיתתי של המדידות?">
+          <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                  data-id="a" onclick="s18qSelect('a')">
+            <span class="scq-opt-text">49.8 גרם</span>
+            <span class="scq-radio" aria-hidden="true"></span>
+          </button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                  data-id="b" onclick="s18qSelect('b')">
+            <span class="scq-opt-text">50.0 גרם</span>
+            <span class="scq-radio" aria-hidden="true"></span>
+          </button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                  data-id="c" onclick="s18qSelect('c')">
+            <span class="scq-opt-text">50.2 גרם</span>
+            <span class="scq-radio" aria-hidden="true"></span>
+          </button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                  data-id="d" onclick="s18qSelect('d')">
+            <span class="scq-opt-text">55 גרם</span>
+            <span class="scq-radio" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="s18-remember-stage hidden" id="s18-remember-video-wrap" aria-hidden="true">
+      <div class="s18-remember-bubble" id="s18-remember-bubble" aria-hidden="true">
+        <span class="s18-remember-bubble-text">ממממ המשוב הזה חשוב!</span>
+      </div>
+      <video id="s18-remember-video" class="s18-remember-video" muted playsinline preload="auto"></video>
+    </div>
+
+    <!-- Bottom action bar -->
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s18q-check" type="button" disabled
+                onclick="s18qCheck()">צדקתי?</button>
+        <button class="scq-hint" id="s18q-hint" type="button"
+                style="visibility:hidden" onclick="s18qOpenHint()">
+          <span>אפשר רמז?</span>
+          <img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt="">
+        </button>
+      </div>
+      <button class="scq-back" id="s18-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S18 Feedback Popup — OUTSIDE .screen divs, inside #app.
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="scq-popup hidden" id="s18q-popup"
+       onmousedown="s18qPopupMouseDown(event)"
+       role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button"
+              onclick="s18qClosePopup()" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="s18q-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="s18q-popup-body"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S18 Hint overlay — OUTSIDE .screen divs, inside #app.
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="scq-hint-overlay hidden" id="s18q-hint-overlay"
+       onclick="s18qCloseHintOnBackdrop(event)">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true"
+         aria-labelledby="s18q-hint-title">
+      <div class="scq-hint-content">
+        <div class="scq-hint-text">
+          <h2 class="scq-hint-title" id="s18q-hint-title"><strong>רמז</strong></h2>
+          <div class="scq-hint-body">
+            <p>חברו את כל המדידות וחלקו במספר הקבוצות.</p>
+          </div>
+        </div>
+        <img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt="">
+      </div>
+      <button class="scq-hint-close" type="button" onclick="s18qCloseHint()">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S19 — Screen 20 · StandardPractice Q5 (section ב) — SingleChoiceQuestion
+       "ממוצע מדידות" — conclusion question; correct = option c
+       ("המדידות היו מהימנות ומדויקות"). Clone of S18 (5a). Scores Q5.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="19" id="s19">
+
+    <!-- Progress Question nav -->
+    <nav class="progress-question" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 3</span>
+      </div>
+      <div class="progress-question__connector" data-connector="3"></div>
+      <div class="progress-question__item" data-question="4">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 4</span>
+      </div>
+      <div class="progress-question__connector" data-connector="4"></div>
+      <div class="progress-question__item" data-question="5">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 5</span>
+      </div>
+    </nav>
+
+    <!-- Question column (right-aligned) -->
+    <div class="s19q-content">
+      <div class="s19q-col">
+        <div class="s19q-text">
+          <p class="s19q-title">ממוצע מדידות</p>
+          <div class="s19q-bodygroup">
+            <p class="s19q-body">חמש קבוצות שונות במעבדה קיבלו משימה למדוד מסה של 50 גר' מים.<br>
+              התוצאות שדיווחו הקבוצות היו:  49.8 גרם, 50.1 גרם, 50.0 גרם, 49.9 גרם, 50.2 גרם.</p>
+            <p class="s19q-question">סעיף ב: מה ניתן להסיק מכך שהתוצאות של כל הקבוצות היו קרובות מאוד זו לזו?</p>
+          </div>
+        </div>
+
+        <div class="scq-answers" id="s19q-answers" role="radiogroup"
+             aria-label="מה ניתן להסיק מכך שהתוצאות של כל הקבוצות היו קרובות מאוד זו לזו?">
+          <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                  data-id="a" onclick="s19qSelect('a')">
+            <span class="scq-opt-text">לפחות קבוצה אחת מדדה בצורה שגויה</span>
+            <span class="scq-radio" aria-hidden="true"></span>
+          </button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                  data-id="b" onclick="s19qSelect('b')">
+            <span class="scq-opt-text">המסה של המים השתנתה בין הקבוצות</span>
+            <span class="scq-radio" aria-hidden="true"></span>
+          </button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                  data-id="c" onclick="s19qSelect('c')">
+            <span class="scq-opt-text">המדידות היו מהימנות ומדויקות</span>
+            <span class="scq-radio" aria-hidden="true"></span>
+          </button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                  data-id="d" onclick="s19qSelect('d')">
+            <span class="scq-opt-text">המדידות היו מהימנות אך לא מדויקות</span>
+            <span class="scq-radio" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom action bar -->
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s19q-check" type="button" disabled
+                onclick="s19qCheck()">צדקתי?</button>
+        <button class="scq-hint" id="s19q-hint" type="button"
+                style="visibility:hidden" onclick="s19qOpenHint()">
+          <span>אפשר רמז?</span>
+          <img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt="">
+        </button>
+      </div>
+      <button class="scq-back" id="s19-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S19 Feedback Popup — OUTSIDE .screen divs, inside #app.
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="scq-popup hidden" id="s19q-popup"
+       onmousedown="s19qPopupMouseDown(event)"
+       role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button"
+              onclick="s19qClosePopup()" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="s19q-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="s19q-popup-body"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S19 Hint overlay — OUTSIDE .screen divs, inside #app.
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="scq-hint-overlay hidden" id="s19q-hint-overlay"
+       onclick="s19qCloseHintOnBackdrop(event)">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true"
+         aria-labelledby="s19q-hint-title">
+      <div class="scq-hint-content">
+        <div class="scq-hint-text">
+          <h2 class="scq-hint-title" id="s19q-hint-title"><strong>חשבו:</strong></h2>
+          <div class="scq-hint-body">
+            <p>מהם שני המושגים המתארים תוצאות הקרובות לערך האמיתי ותוצאות הקרובות זו לזו?</p>
+          </div>
+        </div>
+        <img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt="">
+      </div>
+      <button class="scq-hint-close" type="button" onclick="s19qCloseHint()">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S12 Hint overlay — OUTSIDE .screen divs, inside #app.
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="scq-hint-overlay hidden" id="s12q-hint-overlay"
+       onclick="s12qCloseHintOnBackdrop(event)">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true"
+         aria-labelledby="s12q-hint-title">
+      <div class="scq-hint-content">
+        <div class="scq-hint-text">
+          <h2 class="scq-hint-title" id="s12q-hint-title"><strong>חשבו:</strong></h2>
+          <div class="scq-hint-body">
+            <p>האם תוצאות המדידה דומות מספיק כדי שיהיה לנו ביטחון במסקנה?</p>
+          </div>
+        </div>
+        <img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt="">
+      </div>
+      <button class="scq-hint-close" type="button" onclick="s12qCloseHint()">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <div class="img-zoom-modal hidden" id="img-zoom-modal" aria-hidden="true">
+    <div class="img-zoom-modal__backdrop" data-zoom-close="true"></div>
+    <div class="img-zoom-modal__panel" role="dialog" aria-modal="true" aria-label="תצוגת תמונה מוגדלת">
+      <button class="img-zoom-modal__close" type="button" aria-label="סגירת התמונה" data-zoom-close="true"><svg class="img-zoom-modal__close-icon" aria-hidden="true" width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.192 1.192L13.808 13.808M13.808 1.192L1.192 13.808" stroke="currentColor" stroke-width="2.383" stroke-linecap="round"/></svg></button>
+      <div class="img-zoom-modal__stage" id="img-zoom-modal-stage"></div>
+    </div>
+  </div>
+
+    <!-- ═══════════════════════════════════════ REPORT MODAL ═══════════════════════════════════════ -->
+    <div id="report-modal" class="report-modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="report-modal-title">
+      <div class="report-modal-box">
+        <button class="report-close-btn" onclick="tryCloseReportModal()" aria-label="סגור">&#10005;</button>
+        <h2 class="report-modal-title" id="report-modal-title">דיווח על בעיה</h2>
+        <p class="report-modal-body">משהו לא ברור או לא עובד כמו שצריך? ספרו לנו מה קרה כדי שנטפל.</p>
+        <div class="report-field">
+          <label class="report-label" for="report-type">מה סוג הבעיה <span class="required-star">*</span></label>
+          <select class="report-select" id="report-type">
+            <option value="" disabled selected>בחרו סוג בעיה</option>
+            <option value="technical">תקלה טכנית או שמשהו לא עובד</option>
+            <option value="unclear">משהו לא ברור לי</option>
+            <option value="other">אחר</option>
+          </select>
+        </div>
+        <div class="report-field">
+          <label class="report-label" for="report-text">מה קרה? <span class="required-star">*</span></label>
+          <textarea class="report-textarea" id="report-text" maxlength="250" rows="4" placeholder="תארו את הבעיה..."></textarea>
+          <span class="report-char-count" id="report-char-count">0 / 250</span>
+        </div>
+        <p class="report-error" id="report-error" hidden>נא לבחור סוג בעיה ולתאר מה קרה.</p>
+        <div class="report-actions">
+          <button class="report-submit-btn" onclick="submitReport()">שליחה</button>
+          <button class="report-cancel-btn" onclick="tryCloseReportModal()">ביטול</button>
+        </div>
+        <div class="report-thanks" id="report-thanks" hidden>
+          <p>תודה! הדיווח נשלח. נטפל בהקדם.</p>
+          <button class="report-submit-btn" onclick="forceCloseReportModal()">סגירה</button>
+        </div>
+      </div>
+    </div>
+    <div id="report-confirm-modal" class="report-modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+      <div class="report-modal-box report-confirm-box">
+        <h2 class="report-modal-title" id="confirm-modal-title">בטוח לסגור את החלון?</h2>
+        <p class="report-modal-body">בלחיצה על סגירה לא יישלח דיווח</p>
+        <div class="report-actions">
+          <button class="report-cancel-btn" onclick="forceCloseReportModal()">סגור חלון</button>
+          <button class="report-submit-btn" onclick="backToReportForm()">אני רוצה לדווח</button>
+        </div>
+      </div>
+    </div>
+
+</div><!-- /#app -->
+<script src="js/main.js?v=2"></script>
+</body>
+</html>

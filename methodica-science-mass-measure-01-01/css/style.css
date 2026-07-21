@@ -1,0 +1,3194 @@
+/* ═══════════════════════════════════════════════════════
+   css/style.css  —  720 Science · Mass Measurement Lomda
+   Canvas: 1280 × 710 px   (matches the 720 reference engine)
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Local fonts (Assistant) ───────────────────────────
+   Loaded from assets/fonts/ — used before Google Fonts CDN.
+   Google Fonts <link> in index.html remains as network fallback.
+   ───────────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'Assistant';
+  src: url('../assets/fonts/Assistant-ExtraLight.ttf') format('truetype');
+  font-weight: 200; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Assistant';
+  src: url('../assets/fonts/Assistant-Light.ttf') format('truetype');
+  font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Assistant';
+  src: url('../assets/fonts/Assistant-Regular.ttf') format('truetype');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Assistant';
+  src: url('../assets/fonts/Assistant-Medium.ttf') format('truetype');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Assistant';
+  src: url('../assets/fonts/Assistant-SemiBold.ttf') format('truetype');
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Assistant';
+  src: url('../assets/fonts/Assistant-Bold.ttf') format('truetype');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Assistant';
+  src: url('../assets/fonts/Assistant-ExtraBold.ttf') format('truetype');
+  font-weight: 800; font-style: normal; font-display: swap;
+}
+/* ─── Reset ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Subject theme tokens — Figma Variable Collection (720 UI Templates)
+   Source of truth: Colors System page, Figma eSbp4bKHgBky0rakDb8l9N node 618:10118.
+   Default theme: science. Theme switch = data-subject-theme attribute on <body>;
+   only Subject/* tokens may change between themes. ── */
+:root {
+  --subject-100: #d4f3ff;
+  --subject-200: #c7f0ff;
+  --subject-300: #b9ecff;
+  --subject-400: #00baff;
+  --subject-500: #019de5;
+  --subject-600: #0690d0;
+  --subject-700: #007ac6;
+  --subject-800: #0070c0;
+  --subject-900: #002060;
+  --subject-alpha-100: rgba(0, 186, 255, 0);
+  --subject-alpha-200: rgba(0, 186, 255, 0.3);
+}
+
+body[data-subject-theme="math"] {
+  --subject-100: #f1d9ff;
+  --subject-200: #e7c2ff;
+  --subject-300: #e0bff5;
+  --subject-400: #ce82ff;
+  --subject-500: #7100b9;
+  --subject-600: #8518cc;
+  --subject-700: #8300d9;
+  --subject-800: #7106b7;
+  --subject-900: #580091;
+  --subject-alpha-100: rgba(165, 28, 255, 0);
+  --subject-alpha-200: rgba(165, 28, 255, 0.3);
+}
+
+
+/* ─── Global utility ───────────────────────────────────── */
+.hidden { display: none !important; }
+
+/* ─── Global ────────────────────────────────────────────── */
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  direction: rtl;
+  font-family: 'Assistant', sans-serif;
+  background: #fff;
+}
+
+/* ─── App Canvas ────────────────────────────────────────── */
+#app {
+  position: absolute;
+  /* Width/height are set dynamically by scaleApp() to fill the viewport
+     (in design coords). The 1280×710 fallback keeps the page sensible if JS
+     is still booting. */
+  width: 1280px; height: 710px;
+  transform-origin: top left;
+  background: #fff;
+  overflow: hidden;
+}
+
+/* ─── Screens ───────────────────────────────────────────── */
+/* .screen fills #app (which fills the viewport) so chrome anchored to its
+   bottom/top edges (flag button, .scq-bar, .screen::after) reaches the
+   actual screen edges on tablet aspect ratios. Per-screen content stays
+   positioned via absolute layout against the 1280-wide design grid. */
+.screen {
+  position: absolute; inset: 0;
+  display: none; overflow: hidden;
+}
+.screen.active { display: block; }
+
+/* 74px white feedback bar at the bottom of every screen (Figma standard). */
+.screen::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 74px;
+  background: #fff;
+  border-top: 0.4px solid #AEAEAE;
+  pointer-events: none;
+  z-index: 9;
+}
+
+/* ═══════════════════════════════════════════════════════
+   GLOBAL COMPONENT — Report / Issue button (top-left).
+   Figma "issue button" component (default + hover variants).
+   Appears on every screen. Visual only for now (no behavior).
+   - default: gray circle + flag icon
+   - hover:   blue/white circle + flag icon + "מצאתם בעיה?" label
+   Icon = exact Figma PNG; label = live HTML (never baked in).
+   ═══════════════════════════════════════════════════════ */
+.flag-btn {
+  position: absolute; top: 16px; left: 16px;
+  width: 88px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: none; border: none; padding: 0; cursor: pointer;
+  z-index: 30;          /* above screen content + feedback bar */
+}
+.flag-btn-icon {
+  width: 38px; height: 38px; flex-shrink: 0;
+  background: url('../assets/img/btn-flag-default.png') no-repeat center / contain;
+}
+.flag-btn:hover .flag-btn-icon,
+.flag-btn:focus-visible .flag-btn-icon {
+  background-image: url('../assets/img/btn-flag-hover.png');
+}
+.flag-btn-label {
+  font-family: 'Assistant', sans-serif;
+  font-weight: 600; font-size: 14px; color: var(--subject-500);
+  text-align: center; width: 80px; line-height: normal;
+  direction: rtl; display: none;
+}
+.flag-btn:hover .flag-btn-label,
+.flag-btn:focus-visible .flag-btn-label { display: block; }
+
+/* ─── Shared: Continue Button — blue pill, bottom-left of bar ── */
+.btn-continue {
+  position: absolute;
+  bottom: 15px; left: 24px;   /* centered in 74px bar: (74-44)/2 = 15px */
+  z-index: 12;                /* above the ::after white bar (z-index 9) */
+  min-width: 140px;
+  padding: 12px 40px;
+  background: linear-gradient(180deg, #005FBE 9%, #0059B2 23.36%, #003971 100%);
+  color: #fff;
+  border: none; border-radius: 1000px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px; font-weight: 400;
+  cursor: pointer; direction: rtl;
+  text-align: center; white-space: nowrap;
+}
+.btn-continue:not(:disabled):hover { font-weight: 600; }
+.btn-continue.hidden { display: none !important; }
+/* Disabled state — gray inactive pill (modeled on the reference צדקתי button) */
+.btn-continue:disabled {
+  background: #AEAEAE;
+  color: #303030;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   TEMPLATE — TwoOptionSelection
+   Title + subtitle + two single-select cards. Reusable for any
+   "choose one of two" screen. Card states: hover + selected.
+   ═══════════════════════════════════════════════════════ */
+#s0 { background: #fff; }
+
+/* Screen 01: +10% image window — 238px box */
+#s0 .option-card-img { width: 238px; }
+
+/* S0 + S4 character cards: reduce padding from global 16px to 4px so characters
+   fill the frame. aspect-ratio:1 eliminates the horizontal gap caused by the global
+   296/278 ratio on square-ish character images. object-fit:contain keeps full visibility.
+   4px minimum padding is safe: char-1-selection and all cards images have 0px transparent
+   at top or bottom — they reach the PNG edge — so we need a small CSS buffer. */
+#s0 .option-card-img,
+#s4 .option-card-img {
+  padding: 4px;
+}
+#s0 .option-card-img img,
+#s4 .option-card-img img {
+  object-fit: contain;
+}
+
+.select-content {
+  position: absolute;
+  left: 50%; top: calc(50% - 37px);   /* vertically centered above the 74px bar */
+  transform: translate(-50%, -50%);
+  width: 810px;
+  display: flex; flex-direction: column; align-items: center; gap: 40px;
+}
+
+.select-head {
+  display: flex; flex-direction: column; gap: 8px;
+  align-items: center; width: 100%;
+}
+.select-title {
+  width: 100%; text-align: center;
+  font-size: 40px; font-weight: 700; color: #303030;
+  direction: rtl; line-height: 1.2;
+}
+.select-subtitle {
+  width: 100%; text-align: center;
+  font-size: 28px; font-weight: 700; color: #303030;
+  direction: rtl;
+}
+
+/* ── Cards row ── */
+.option-cards {
+  display: flex; justify-content: center; gap: 24px;
+  direction: ltr;   /* keep the two cards in a stable left-to-right order */
+}
+
+.option-card {
+  width: 296px;
+  cursor: pointer;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 16px;
+  outline: none;
+}
+.option-card-img {
+  width: 220px;
+  border: 3px solid rgba(201, 206, 216, 0.4);
+  border-radius: 16px; padding: 16px;
+  background: #fff; overflow: hidden;
+  transition: border-color 0.15s, background 0.15s;
+}
+.option-card-img img {
+  width: 100%;
+  aspect-ratio: 296 / 278;
+  object-fit: cover; border-radius: 16px;
+  display: block;
+}
+/* Hover + keyboard-focus — Figma ImageContainer state=hover: Subject/500 border */
+.option-card:hover .option-card-img,
+.option-card:focus-visible .option-card-img { border-color: var(--subject-500); }
+/* Selected — Figma ImageContainer state=selected: 2px Subject/500 border + Subject/100 fill */
+.option-card.selected .option-card-img {
+  border: 2px solid var(--subject-500);
+  background: var(--subject-100);
+}
+
+.option-card-labels {
+  display: flex; flex-direction: column; gap: 12px;
+  align-items: center; text-align: center; color: #303030;
+}
+.option-card-name {
+  font-size: 32px; font-weight: 700;
+  color: #303030; white-space: nowrap;
+}
+.option-card-desc {
+  font-size: 24px; font-weight: 400; color: #303030;
+  width: 228px; text-align: center; direction: rtl;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   TEMPLATE — SingleChoiceQuestion (Screen 02)
+   Question image (left) + question text + 4 single-choice
+   option pills (right). Feedback panel (left) + bottom bar.
+   Figma: dpY9DTl41tzW8SKvcPWU0C, node 2085:4465.
+   ═══════════════════════════════════════════════════════ */
+#s1 { background: #fff; }
+
+/* Question block — Figma: top 139px, right 40px, width 1188px */
+.scq-question {
+  position: absolute; top: 139px; right: 40px;
+  width: 1188px; height: auto;
+}
+
+/* Image (left) — 380×380 square, matches Figma media placeholder (node 2185-4203) */
+.scq-img {
+  position: absolute; left: 0; top: 0;
+  width: 380px; height: 380px; padding: 8px;
+}
+.scq-img-inner {
+  width: 100%; height: 100%;
+  position: relative;            /* anchor for the zoom button */
+  background: #fff; border: 0.5px solid rgba(174, 174, 174, 0.5);
+  border-radius: 16px; overflow: hidden;
+}
+.scq-img-inner img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+/* Weight readouts on the scales in the S1 balloons photo.
+   The 1536×1024 image is letterboxed (object-fit: contain) inside the
+   square frame, so the overlay matches the image's aspect ratio and is
+   vertically centered — label percentages track the photo itself.
+   Tag look copied from part 02 S1 name tags (.s12q-name-tag), bold. */
+.scq-scale-labels {
+  position: absolute;
+  left: 0; width: 100%;
+  aspect-ratio: 1536 / 1024;
+  top: 50%; transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 2;
+}
+.scq-scale-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 65px; height: 35px;
+  padding: 0 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff;
+  color: var(--subject-500);
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  box-sizing: border-box;
+  border-radius: 6px;
+}
+/* Centered on each scale's blank front panel (its "screen") */
+.scq-scale-label--inflated { left: 30%; top: 73%; }   /* בלון מנופח — 3.5 גרם */
+.scq-scale-label--empty    { left: 74%; top: 73%; }   /* בלון ריק — 3 גרם */
+
+/* Question text (right) — vertically centered against the image */
+.scq-qtext {
+  position: absolute; right: 0; top: 0;
+  width: 792px; height: auto;
+  display: flex; flex-direction: column; justify-content: flex-start; gap: 0;
+  padding-top: 16px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 700; color: var(--subject-500);   /* Blue/70, Body/B5 Bold */
+  text-align: right; direction: rtl; line-height: normal;
+}
+
+/* Answers (right, below the question text) */
+.scq-answers {
+  position: absolute; right: 0; top: 100px;
+  width: 604px;
+  display: flex; flex-direction: column; gap: 12px; 
+}
+.scq-opt {
+  width: 604px; min-height: 46px;
+  border: 2px solid var(--subject-500); border-radius: 1000px;
+  background: #fff; padding: 7px 20px;
+  display: flex; align-items: center; gap: 10px;
+  direction: rtl; cursor: pointer;
+  font-family: 'Assistant', sans-serif;
+  overflow: visible;
+}
+.scq-opt-text {
+  flex: 1; text-align: right;
+  font-size: 22px; font-weight: 400; color: #222; line-height: 1.1;
+}
+.scq-opt:focus-visible { outline: 2px solid var(--subject-700); outline-offset: 2px; }
+.scq-opt:disabled { cursor: default; }
+/* Correct / wrong pill states */
+.scq-opt.correct { background: #edf8ed; border: 2px solid #609e12; }
+.scq-opt.wrong   { background: #fff0f4; border: 2px solid #b20010; }
+
+/* Radio indicator (22px) — RTL: sits on the RIGHT (reading start) of the pill */
+.scq-radio {
+  width: 22px; height: 22px; flex-shrink: 0;
+  border: 2px solid var(--subject-500); border-radius: 1000px;
+  position: relative; box-sizing: border-box;
+  order: -1;   /* first flex item → right edge in the RTL row */
+}
+.scq-opt.selected .scq-radio { background: var(--subject-500); }
+.scq-opt.correct  .scq-radio { background: #609e12; border-color: #609e12; }
+.scq-opt.wrong    .scq-radio { background: #b20010; border-color: #b20010; }
+/* check mark (correct) — centered via transform */
+.scq-opt.correct .scq-radio::after {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  width: 6px; height: 11px;
+  border: solid #fff; border-width: 0 2px 2px 0;
+  transform: translate(-50%, -60%) rotate(45deg);  /* optical center of a checkmark */
+}
+/* X mark (wrong) — two equal bars crossing at the exact circle center */
+.scq-opt.wrong .scq-radio::before,
+.scq-opt.wrong .scq-radio::after {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  width: 11px; height: 2px; background: #fff;
+}
+.scq-opt.wrong .scq-radio::before { transform: translate(-50%, -50%) rotate(45deg); }
+.scq-opt.wrong .scq-radio::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+
+/* ── Feedback panel (left, bottom-anchored at Figma y=604) ── */
+.scq-feedbox {
+  position: absolute; left: 0; bottom: 106px;   /* 710 - 604 = 106 */
+  width: 426px;
+  border: 0.3px solid #aeaeae;
+  border-radius: 0 12px 12px 0;                 /* right corners only */
+  padding: 24px 24px 56px;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+  direction: rtl; z-index: 14;
+}
+.scq-feedbox.is-correct { background: #edf8ed; }
+.scq-feedbox.is-wrong   { background: #ffdbdc; }
+.scq-feedbox.hidden { display: none !important; }
+.scq-fb.hidden { display: none !important; }
+.scq-fb { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.scq-fb-row {
+  display: flex; align-items: flex-start;
+  width: 100%; gap: 16px; direction: rtl;
+}
+.scq-fb-title {
+  flex: 1;   /* fills the row; text right-aligned next to the toggle on the right */
+  font-family: 'Assistant', sans-serif;
+  font-weight: 700; font-size: 20px; color: #222; text-align: right;
+  line-height: normal;
+}
+/* All feedback titles are bold (incl. 2nd-attempt "תשובתך אינה נכונה." — fixed in Figma) */
+.scq-fb-text {
+  font-family: 'Assistant', sans-serif;
+  font-weight: 400; font-size: 20px; color: #222;
+  text-align: right; line-height: normal; width: 100%;
+}
+.scq-fb-text p { line-height: normal; }
+.scq-feedbox.collapsed .scq-fb-text { display: none; }
+
+/* Collapse button (Figma node 2090:6004) — 30px white circle,
+   thin 1px #303030 border, thin wide shallow chevron (14×7) centered. */
+.scq-fb-toggle {
+  width: 30px; height: 30px; flex-shrink: 0;
+  border: 1px solid #303030; border-radius: 100px;
+  background: #fff; cursor: pointer; position: relative;
+  order: -1;   /* RTL: first flex item → RIGHT side, beside the title */
+}
+.scq-fb-toggle::after {
+  content: ''; position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='7' viewBox='0 0 14 7'%3E%3Cpath d='M1 1 7 6 13 1' fill='none' stroke='%23303030' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center;
+}
+.scq-feedbox.collapsed .scq-fb-toggle::after { transform: rotate(180deg); }  /* points up */
+
+/* Word wrapper that anchors the floating info icon above it */
+.tooltip-word {
+  position: relative;
+  display: inline-block;
+}
+
+/* Info icon — absolutely positioned above the left edge of the target word (RTL: final letter) */
+.scq-info {
+  position: absolute;
+  top: -8px; left: 0;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  width: 15px; height: 15px;
+  cursor: help;
+}
+/* Vector icon, not a font character. Figma source of truth:
+   eSbp4bKHgBky0rakDb8l9N node 1580:17042 ("Tooltip",
+   TooltipAllocation=WhiteBg) — self-contained 15×15 asset: the SVG already
+   bakes in the blue circular background and the white "i" path, so no
+   background/border-radius is drawn on `.scq-info` here — a second,
+   independently-sized CSS circle behind the SVG is exactly the kind of
+   drift risk (rounding, anti-aliasing edges) this asset is meant to avoid. */
+.scq-info-i {
+  display: block;
+  flex: 0 0 15px;
+  width: 15px; height: 15px;
+}
+.scq-tooltip {
+  position: absolute; bottom: calc(100% + 10px);
+  left: 50%; transform: translateX(-50%);   /* centered on the info icon */
+  width: 260px;
+  background: #fff; border: 1px solid #aeaeae; border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  padding: 18px 15px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 18px; font-weight: 400; color: #222;
+  text-align: right; direction: rtl; line-height: normal;
+  display: none; z-index: 40;
+}
+.scq-info:hover .scq-tooltip,
+.scq-info:focus .scq-tooltip,
+.scq-info:focus-within .scq-tooltip { display: block; }
+
+/* Answer option icon sits slightly higher than the popup icon */
+.scq-opt .scq-info { top: -9px; }
+
+/* ── Feedback popup (mirrors ddq-popup style) ── */
+.scq-popup {
+  position: absolute;
+  left: 2px; bottom: 76px;
+  width: 426px;
+  height: auto;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.18);
+  display: flex; flex-direction: column; gap: 4px;
+  direction: rtl; z-index: 50;
+  cursor: move;
+}
+.scq-popup.hidden { display: none !important; }
+.scq-popup-header {
+  display: flex; align-items: flex-start; gap: 8px;
+  direction: ltr;
+  width: 100%;
+}
+.scq-popup-close {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  border: none; border-radius: 50%;
+  background: transparent;
+  color: #555; font-size: 16px; line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0;
+}
+.scq-popup-title {
+  flex: 1;
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px; font-weight: 700;
+  text-align: right; direction: rtl;
+  line-height: normal; margin: 0;
+  padding-top: 4px;
+}
+.scq-popup-body { direction: rtl; }
+.scq-popup-body p {
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px; font-weight: 400; color: #222;
+  text-align: right; direction: rtl;
+  line-height: normal; margin: 0 0 4px;
+}
+.scq-popup-body p:last-child { margin-bottom: 0; }
+
+/* ── Bottom action bar ── */
+.scq-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 74px;
+  background: #fff; border-top: 0.4px solid #aeaeae;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 34px; direction: ltr;   /* check+hint left, back right */
+  z-index: 15;
+}
+.scq-bar-main { display: flex; align-items: center; gap: 16px; }
+
+.scq-check {
+  min-width: 140px; padding: 12px 40px;
+  border: none; border-radius: 1000px;
+  background: #aeaeae; color: #303030;
+  font-family: 'Assistant', sans-serif; font-size: 20px; font-weight: 400;
+  cursor: not-allowed; direction: rtl; white-space: nowrap;
+  text-align: center;
+}
+.scq-check:not(:disabled) {
+  background: linear-gradient(180deg, #005FBE 9%, #0059B2 23.36%, #003971 100%);
+  color: #fff; cursor: pointer;
+}
+.scq-check:not(:disabled):hover { font-weight: 600; }
+
+.scq-hint {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 20px;
+  border: 1px solid var(--subject-700); border-radius: 1000px; background: #fff;
+  color: var(--subject-700);
+  font-family: 'Assistant', sans-serif; font-size: 20px; font-weight: 400;
+  cursor: pointer; direction: rtl;
+}
+/* Figma 196:6024 — bulb icon sits to the RIGHT of the text (first flex item in RTL) */
+.scq-hint .scq-hint-ico { width: 26px; height: 22.3px; order: -1; }
+/* Figma 1645:18704 — hint hover: text goes SemiBold, border/colors unchanged */
+.scq-hint:hover:not(:disabled) { font-weight: 600; }
+.scq-hint:disabled { border-color: #aeaeae; color: #aeaeae; cursor: default; }
+/* Figma 196:6021 — disabled bulb is solid #aeaeae (black → invert 68.2% = rgb(174,174,174)) */
+.scq-hint:disabled .scq-hint-ico { filter: brightness(0) invert(0.682); }
+
+.scq-back {
+  width: 140px; padding: 12px 40px;
+  border: 1px solid var(--subject-700); border-radius: 1000px; background: #fff;
+  color: var(--subject-700);
+  font-family: 'Assistant', sans-serif; font-size: 20px; font-weight: 400;
+  cursor: pointer; direction: rtl;
+}
+.scq-back:hover { font-weight: 600; border-width: 1.5px; } /* Figma 230:4050 */
+
+/* ── Hint popup (modal) ── */
+.scq-hint-overlay {
+  position: absolute; inset: 0; z-index: 60;
+  background: rgba(255, 255, 255, 0.78);
+  display: flex; align-items: center; justify-content: center;
+}
+.scq-hint-overlay.hidden { display: none !important; }
+.scq-hint-popup {
+  background: var(--subject-500); border-radius: 48px;
+  padding: 40px;
+  display: flex; flex-direction: column; align-items: center; gap: 24px;
+  width: 546px; max-width: 92%;
+}
+.scq-hint-content {
+  /* align-items: stretch (default) — NOT flex-end. With a single column
+     child (.scq-hint-text) and no explicit width, flex-end shrink-wraps
+     the child to its content width, then (direction: rtl) anchors that
+     shrunk box to the physical LEFT — so short hint text renders
+     right-aligned WITHIN a box that itself sits away from the popup's
+     right edge, reading as "right-aligned but starting from the middle."
+     Stretch keeps the child at the full 462px width so text-align: right
+     on the title/body always hugs the real right edge, regardless of
+     text length. */
+  display: flex; flex-direction: column; gap: 24px;
+  width: 462px; max-width: 100%; direction: rtl;
+}
+.scq-hint-text {
+  flex: 1; min-width: 0; direction: rtl;
+  display: flex; flex-direction: column; gap: 24px;
+  color: #fff;
+}
+.scq-hint-title {
+  width: 100%; text-align: right; position: relative;
+  padding-right: 56px;
+  font-family: 'Assistant', sans-serif; font-weight: 700; font-size: 32px;
+  color: #fff; line-height: normal;
+}
+.scq-hint-title::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 34.3px;
+  background: url("../assets/img/icon-idea-blue.svg") no-repeat center / contain;
+  filter: brightness(0) invert(1);
+}
+.scq-hint-body {
+  width: 100%; text-align: right;
+  font-family: 'Assistant', sans-serif; font-weight: 400; font-size: 24px;
+  color: #fff; line-height: normal;
+}
+.scq-hint-body p { line-height: normal; }
+.scq-hint-ico-lg {
+  display: none;
+}
+.scq-hint-close {
+  width: 196px; padding: 16px 40px;
+  border: none; border-radius: 1000px; background: #fff;
+  color: #303030;
+  font-family: 'Assistant', sans-serif; font-size: 24px; font-weight: 400;
+  cursor: pointer;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   TEMPLATE — FlipCardsReveal (Screen 03)
+   Source of truth: Figma nodes 2120:3978 (State 01) and 2120:4115 (State 02)
+   Card: 325×325px square — both faces identical dimensions.
+   Same padding (16px), border-radius (16px), inset:0 on both faces.
+   ═══════════════════════════════════════════════════════ */
+#s2 { background: #fff; }
+
+/* Override gap between cards for this screen (Figma: 100px between cards) */
+#s2 .option-cards { gap: 100px; }
+
+/* Override content-area gap: Figma uses 50px between text section and cards */
+#s2 .select-content { gap: 50px; }
+
+/* The flip card — 325×325 square, IS the visual card object */
+.frc-card {
+  width: 325px;
+  height: 325px;             /* square, matching Figma */
+  background: transparent;
+  border: none; padding: 0;
+  cursor: pointer; outline: none;
+  position: relative;
+  perspective: 900px;
+}
+
+/* Rotating inner wrapper */
+.frc-card-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.frc-card.is-flipped .frc-card-inner {
+  transform: rotateY(-180deg);
+}
+
+/* Both faces: identical 325×325, same padding, same border-radius */
+.frc-card-front,
+.frc-card-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+
+/* ── Front face: image ───────────────────────────────── */
+.frc-card-front {
+  border: 3px solid rgba(201, 206, 216, 0.4);
+  background: #fff;
+}
+.frc-card-front img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  border-radius: 12px;   /* Figma: 12px inner radius */
+  display: block;
+}
+
+/* Hover + keyboard focus on unflipped card — Figma ImageContainer state=hover: Subject/500 border */
+.frc-card:not(.is-flipped):hover .frc-card-front,
+.frc-card:not(.is-flipped):focus-visible .frc-card-front {
+  border-color: var(--subject-500);
+}
+
+/* ── Back face: text ─────────────────────────────────── */
+.frc-card-back {
+  transform: rotateY(180deg);
+  border: 3px solid var(--subject-500);
+  background: var(--subject-100);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+/* Text wrapper: fills padded area, right-aligned RTL Hebrew */
+.frc-card-back-content {
+  width: 100%;
+  display: flex; flex-direction: column; gap: 10px;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding-top: 2px;
+  text-align: right;
+  direction: rtl;
+}
+.frc-card-back-content p {
+  width: 100%;
+  font-family: 'Assistant', sans-serif;
+  font-size: 22px; font-weight: 400;
+  line-height: 29px; letter-spacing: 0;
+  color: #222; margin: 0;
+}
+
+/* Revealed card: no longer interactive */
+.frc-card.is-flipped { cursor: default; }
+.frc-card:focus-visible { outline: none; }
+.frc-card.is-flipped:focus-visible .frc-card-back {
+  box-shadow: 0 0 0 2px var(--subject-700);
+}
+
+/* Back button in S2 bottom bar */
+#s2-back {
+  position: absolute;
+  bottom: 15px; right: 24px;
+  z-index: 12;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   TEMPLATE — TwoOptionSelection (Screen 05 / S4)
+   ═══════════════════════════════════════════════════════ */
+
+/* Back button — mirrors S2 placement */
+#s4-back {
+  position: absolute;
+  bottom: 15px; right: 24px;
+  z-index: 12;
+}
+
+/* object-fit:contain and padding for S4 character cards is set with S0 above */
+
+
+/* ═══════════════════════════════════════════════════════
+   TEMPLATE — DragAndDropQuestion (Screen 04)
+   Source: Figma dpY9DTl41tzW8SKvcPWU0C nodes 2141:4046–4242
+   Canvas 1280×710. Draggables: 167×167px. Targets: 167×167px.
+   Check enables when ALL required targets are filled (not all
+   draggables placed — a distractor item may remain in source).
+   Feedback popup: floating, draggable, closable (X button).
+   ═══════════════════════════════════════════════════════ */
+#s3 { background: #fff; }
+
+/* ── Content block: centered above the 74px bar ── */
+.ddq-content {
+  position: absolute;
+  left: 50%; top: calc(50% - 37px);
+  transform: translate(-50%, -50%);
+  width: 810px;
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+}
+
+/* ── Text header ── */
+.ddq-header {
+  display: flex; flex-direction: column; gap: 5px;
+  align-items: center; width: 100%; padding: 0 10px;
+}
+.ddq-header-top {
+  display: flex; flex-direction: column; gap: 8px;
+  align-items: center; width: 100%;
+}
+.ddq-title {
+  width: 100%; text-align: center;
+  font-family: 'Assistant', sans-serif;
+  font-size: 40px; font-weight: 700; color: #303030;
+  direction: rtl; line-height: 1.1; margin: 0;
+}
+.ddq-subtitle {
+  width: 100%; text-align: center;
+  font-family: 'Assistant', sans-serif;
+  font-size: 26px; font-weight: 400; color: #303030;
+  direction: rtl; line-height: 1.1; margin: 0;
+}
+.ddq-instructions { width: 100%; }
+.ddq-instructions p {
+  font-family: 'Assistant', sans-serif;
+  font-size: 28px; font-weight: 700; color: #303030;
+  text-align: center; direction: rtl; line-height: 1.2; margin: 0;
+}
+
+/* ── Source tray ── */
+.ddq-source {
+  display: flex; gap: 100px; justify-content: center;
+  direction: ltr;   /* stable physical order: Digital | Human | Analog */
+}
+.ddq-source-slot {
+  width: 167px; height: 167px; flex-shrink: 0;
+}
+
+/* ── Draggable card ── */
+.ddq-drag-card {
+  width: 167px; height: 167px;
+  border: 3px solid rgba(201, 206, 216, 0.4);
+  border-radius: 16px; overflow: hidden;
+  background: #fff; cursor: grab;
+  display: flex; align-items: center; justify-content: center;
+  user-select: none; transition: none;
+}
+/* Shared image class — used in both source cards AND placed inside drop targets */
+.ddq-card-img {
+  width: 150px; height: 150px;
+  object-fit: cover; border-radius: 12px;
+  display: block; pointer-events: none;
+  user-select: none; flex-shrink: 0;
+}
+/* Ghost slot: card is placed in a target — placeholder is HIDDEN (reserves
+   space so the tray layout stays stable, but the learner never sees it) */
+.ddq-drag-card.ghost {
+  visibility: hidden;
+}
+.ddq-drag-card.ghost img { display: none; }
+/* During drag: dim the source slot */
+.ddq-drag-card.dragging { opacity: 0.3; cursor: grabbing; }
+/* After check: no interaction */
+.ddq-drag-card.locked { cursor: default; }
+/* Selected state — the floating drag clone gets a תכלת (light-blue) stroke */
+.ddq-drag-card.pointer-drag-ghost,
+.ddq-placed-card.pointer-drag-ghost {
+  background: #fff;
+  border: 2px solid var(--subject-500);
+}
+
+/* ── Drop targets row ── */
+.ddq-targets-row {
+  display: flex; gap: 100px; justify-content: center;
+  direction: ltr;   /* stable physical order: Digital(left) | Analog(right) */
+}
+.ddq-target-col {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  width: 180px;
+}
+
+/* ── Drop target zone ── */
+.ddq-target {
+  width: 167px; height: 167px;
+  border: 1.5px dashed rgba(0,0,0,0.6);
+  border-radius: 10px; background: #f3f4f5;
+  position: relative; overflow: hidden;
+  flex-shrink: 0; transition: none;
+  /* flex centering — same layout as .ddq-drag-card so placed imgs render identically */
+  display: flex; align-items: center; justify-content: center;
+}
+/* Drag-over (Hover): dashed line turns תכלת (light-blue), white fill */
+.ddq-target.drag-over {
+  background: #fff;
+  border: 2px dashed var(--subject-500);
+}
+/* Occupied (Dropped — card placed, not yet checked): WHITE fill + תכלת stroke.
+   Photos sit on white (not the תכלת fill used for text-pill draggables), so the
+   landscape digital scale letterboxes on white and all three cards look uniform.
+   The transparent placed card lets this white show as margins / letterbox area. */
+.ddq-target.occupied {
+  background: #fff;
+  border: 1.5px solid var(--subject-500);
+}
+/* Correct state after check */
+.ddq-target.correct {
+  background: #fff;
+  border: 2px solid #609e12 !important;
+}
+
+/* Placed card — transparent so the drop-zone state fill (תכלת / white / green)
+   shows around the image; injected by ddqRender */
+.ddq-placed-card {
+  width: 167px; height: 167px;
+  border-radius: 16px; overflow: hidden;
+  background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; cursor: grab;
+}
+.ddq-placed-card.dragging { opacity: 0.3; cursor: grabbing; }
+
+/* Green checkmark badge — top-right corner */
+.ddq-target-badge {
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #609e12;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 5; flex-shrink: 0;
+}
+.ddq-target-badge::after {
+  content: '';
+  width: 5px; height: 9px;
+  border: 2px solid #fff;
+  border-top: none; border-left: none;
+  transform: rotate(45deg) translate(-1px, -1px);
+  display: block;
+}
+
+/* ── Target label ── */
+.ddq-target-label {
+  font-family: 'Assistant', sans-serif;
+  font-size: 26px; font-weight: 700; color: #303030;
+  text-align: center; direction: rtl; margin: 0;
+  width: 210px;   /* slightly wider than target for longer labels */
+}
+
+/* ── Back button in S3 ── */
+#s3-back {
+  position: absolute;
+  bottom: 15px; right: 24px;
+  z-index: 12;
+}
+
+/* ── DigitalWeights composition ──────────────────────────────
+   The image is landscape (~1.83:1). Render at full card width so
+   the entire scale is always visible; height auto-fits.
+   .ddq-item--digital travels with the card in every location
+   (source, any drop target, feedback state) so the same rule
+   fires regardless of which container holds the card.
+   ── */
+.ddq-item--digital .ddq-card-img {
+  width: 167px;
+  height: auto;
+  object-fit: initial;
+  border-radius: 0;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   TEMPLATE — DragAndDropQuestion — Feedback Popup
+   Floating, draggable, closable popup lives outside all
+   .screen divs directly in #app. Background and title
+   color set by JS per correct / incorrect variant.
+   ═══════════════════════════════════════════════════════ */
+.ddq-popup {
+  position: absolute;
+  left: 2px; bottom: 76px;
+  width: 426px;
+  height: auto;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.18);
+  display: flex; flex-direction: column; gap: 4px;
+  direction: rtl; z-index: 50;
+  cursor: move;
+}
+.ddq-popup.hidden { display: none !important; }
+
+/* Header row: X button (physical left) + title text (physical right) */
+.ddq-popup-header {
+  display: flex; align-items: flex-start; gap: 8px;
+  direction: ltr;   /* X on physical left, title fills physical right */
+  width: 100%;
+}
+.ddq-popup-close {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  border: none; border-radius: 50%;
+  background: transparent;
+  color: #555; font-size: 16px; line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0;
+}
+.ddq-popup-title {
+  flex: 1;
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px; font-weight: 700;
+  text-align: right; direction: rtl;
+  line-height: normal; margin: 0;
+  padding-top: 4px;   /* optical vertical alignment with X button */
+}
+.ddq-popup-body { direction: rtl; }
+.ddq-popup-body p {
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px; font-weight: 400; color: #222;
+  text-align: right; direction: rtl;
+  line-height: normal; margin: 0 0 4px;
+}
+.ddq-popup-body p:last-child { margin-bottom: 0; }
+
+.scq-popup-close,
+.ddq-popup-close {
+  position: relative;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #303030;
+  border-radius: 50%;
+  background: #fff;
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  overflow: hidden;
+}
+
+.scq-popup-close::before,
+.scq-popup-close::after,
+.ddq-popup-close::before,
+.ddq-popup-close::after {
+  content: '';
+  position: absolute;
+  width: 11.31px;
+  height: 1.333px;
+  background: #303030;
+  border-radius: 999px;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+}
+
+.scq-popup-close::before,
+.ddq-popup-close::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.scq-popup-close::after,
+.ddq-popup-close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   TEMPLATE — VideoWatchAndContinue (Screen 06 / S5)
+   Source: Figma dpY9DTl41tzW8SKvcPWU0C nodes 2199:4655 / 2199:4670
+   Canvas 1280×710. Content starts at top:64px.
+   Two states: default (continue disabled) / vpv-ended (continue enabled).
+   ═══════════════════════════════════════════════════════ */
+#s5 { background: #fff; }
+#s6 { background: #fff; }
+
+/* ── Content block: centered column starting 64px from top ── */
+.vpv-content {
+  position: absolute;
+  top: 64px; left: 0; right: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 32px;
+}
+
+/* ── Text section: title block + toggle ── */
+.vpv-text {
+  display: flex; flex-direction: column; align-items: center; gap: 15px;
+  width: 100%;
+}
+
+.vpv-header {
+  width: 810px; padding: 10px;
+  margin: 0 auto;
+  display: flex; flex-direction: column; gap: 8px;
+  direction: rtl; text-align: center;
+}
+
+.vpv-title {
+  font-family: 'Assistant', sans-serif;
+  font-size: 40px; font-weight: 700; color: #303030;
+  line-height: 1; margin: 0;
+}
+
+.vpv-subtitle {
+  font-family: 'Assistant', sans-serif;
+  font-size: 26px; font-weight: 400; color: #303030;
+  line-height: 1; margin: 0;
+}
+
+/* ── PathToggle
+   RTL flex: first child → RIGHT side (listening, active by default).
+   TODO: If reused on other screens, document in
+         720-templates/references/_global-components.md as "PathToggle". ── */
+.vpv-toggle {
+  background: var(--subject-500);
+  border-radius: 1000px;
+  padding: 6px;
+  display: flex; flex-direction: row;
+  direction: rtl;
+  position: relative;
+}
+
+.vpv-toggle-pill {
+  position: absolute;
+  background: #fff;
+  border-radius: 1000px;
+  pointer-events: none;
+  transition: left 0.25s ease-in-out, top 0.25s ease-in-out,
+              width 0.25s ease-in-out, height 0.25s ease-in-out;
+}
+
+.vpv-toggle-btn {
+  display: flex; flex-direction: row; align-items: center; justify-content: center;
+  gap: 8px;
+  padding: 6px 24px;
+  border-radius: 1000px;
+  border: none; cursor: pointer;
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px; font-weight: 400; line-height: 1;
+  background: transparent;
+  color: #fff;
+  white-space: nowrap;
+  direction: rtl;
+  position: relative;
+  z-index: 1;
+  transition: color 0.25s ease-in-out;
+}
+
+.vpv-toggle-btn--active {
+  background: transparent;
+  color: var(--subject-500);
+}
+
+.vpv-tab-icon {
+  flex-shrink: 0;
+  display: block;
+  width: 26px; height: 26px;
+}
+
+/* Two-state icon swap (matches Figma node 275:11947):
+   active button → filled icon (.vpv-icon-on); inactive → white outline (.vpv-icon-off). */
+.vpv-toggle-btn .vpv-icon-on  { display: none; }
+.vpv-toggle-btn .vpv-icon-off { display: block; }
+.vpv-toggle-btn--active .vpv-icon-on  { display: block; }
+.vpv-toggle-btn--active .vpv-icon-off { display: none; }
+
+/* ── Video: 646×363px YouTube embed ── */
+.vpv-video-wrap {
+  width: 646px; height: 363px;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  background: #000;
+}
+
+/* YouTube IFrame API replaces #vpv-youtube-player with an iframe; both fill the frame. */
+.vpv-video-wrap iframe,
+#vpv-youtube-player,
+#vpv2-youtube-player {
+  width: 100%; height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* ── Back and continue buttons ── */
+#s5-back,
+#s21-back {
+  position: absolute;
+  bottom: 15px; right: 24px;
+  z-index: 12;
+}
+
+/* ── S21: second video screen (same layout as S5, no PathToggle) ── */
+#s21 { background: #fff; }
+
+/* ── S20: SingleChoiceQuestion without a content image ──
+   Single right-aligned column: title + body + answers in normal flow. */
+#s20 { background: #fff; }
+#s20 .scq-question {
+  display: flex; flex-direction: column; gap: 24px;
+  align-items: flex-start;   /* RTL start = right edge */
+  direction: rtl;
+}
+#s20 .scq-qtext {
+  position: relative; right: auto; top: auto;
+  width: 100%; gap: 8px;
+}
+#s20 .scq-answers {
+  position: relative; right: auto; top: auto;
+}
+
+/* ── FlipCards path (S6) ── */
+
+/* Content gap: Figma FlipCards uses 56px (vs 32px for video) */
+.fpc-content { gap: 56px; }
+
+/* Cards grid: RTL so Card 1 (first child) renders on the RIGHT */
+.fpc-cards {
+  display: flex; flex-wrap: wrap;
+  gap: 22px;
+  justify-content: center;
+  padding: 0 40px;
+  width: 100%;
+  direction: rtl;
+}
+
+/* ── Flip card: 283×283 outer shell ── */
+.fpc-card {
+  width: 283px; height: 283px;
+  perspective: 1200px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.fpc-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+  border-radius: 24px;
+}
+
+.fpc-card.fpc-flipped .fpc-inner {
+  transform: rotateY(-180deg);
+}
+
+/* ── Card face (shared) ── */
+.fpc-front,
+.fpc-back {
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border: 2px solid var(--subject-500);
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+/* ── Front face: white bg, 16px padding, image slot ── */
+.fpc-front {
+  background: #fff;
+  padding: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.fpc-img-slot {
+  width: 100%; height: 100%;
+  background: transparent;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.fpc-img-slot img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+}
+
+/* ── Back face: light blue bg, centered text ── */
+.fpc-back {
+  background: var(--subject-100);
+  padding: 24px 16px;
+  transform: rotateY(180deg);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.fpc-back-text {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 400; color: #303030;
+  text-align: right; direction: rtl;
+  line-height: 1.25;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding-top: 0;
+}
+
+.fpc-back-text p { margin: 0 0 6px; width: 100%; }
+.fpc-back-text p:last-child { margin-bottom: 0; }
+.fpc-back-text strong { font-weight: 700; }
+
+#s6-back {
+  position: absolute;
+  bottom: 15px; right: 24px;
+  z-index: 12;
+}
+
+
+/* ─── SCREEN 08 — TransitionScreen (S7) ─────────────────────── */
+
+.s7-content {
+  position: absolute;
+  inset: 0 0 74px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.s7-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.s7-title {
+  font-family: 'Assistant', sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: #303030;
+  margin: 0;
+}
+
+.s7-subtitle {
+  font-family: 'Assistant', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #303030;
+  margin: 0;
+}
+
+.s7-video-wrap {
+  width: 640px;
+  height: 360px;
+  flex-shrink: 0;
+}
+
+.s7-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+#s7-back {
+  position: absolute;
+  bottom: 15px;
+  right: 24px;
+  z-index: 12;
+}
+
+/* ─── SCREEN 09 — DropdownQuestion Multiple Blanks (S8) ──────── */
+
+#s8 { background: #fff; }
+
+/* ─── SCREEN 10 — SingleChoiceQuestionImage (S9) ──────── */
+
+#s9 { background: #fff; }
+
+/* ── S9 layout: flex-row (image left + right column).
+   Overrides S1's absolute-positioned children. ── */
+#s9 .scq-question {
+  position: absolute; top: 139px; left: 40px; right: 40px; width: auto;
+  display: flex; flex-direction: row; gap: 16px; align-items: flex-start;
+  justify-content: flex-end; /* pushes items right so right-col right edge = content right edge */
+  direction: ltr; /* image stays left, right-column stays right; text inside uses its own rtl */
+}
+/* Image: flow in flex (not absolutely placed) */
+#s9 .scq-img {
+  position: relative; left: auto; top: auto; flex-shrink: 0;
+}
+/* Right column: text block + answers stacked vertically */
+#s9 .s9q-right {
+  width: 792px; flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 24px;
+  align-items: flex-start; /* RTL start = right side; answers right-align within column */
+  direction: rtl;
+}
+/* Override qtext absolute positioning for S9 */
+#s9 .scq-qtext {
+  position: relative; right: auto; top: auto;
+  width: 100%; padding-top: 0; gap: 16px;
+}
+/* Override answers absolute positioning for S9 */
+#s9 .scq-answers {
+  position: relative; right: auto; top: auto; width: 604px;
+}
+
+.s9q-qtitle {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 700;
+  color: var(--subject-500); text-align: right; direction: rtl;
+  margin: 0; line-height: 1.4;
+}
+
+.s9q-qbody {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 400;
+  color: #303030; text-align: right; direction: rtl;
+  margin: 0; line-height: 1.5;
+}
+
+/* S8 decorative image — .scq-img card anchored to the screen itself
+   (no .scq-question wrapper here). 8px card padding puts the visible
+   frame at x=40, mirroring the content column's right:40. */
+.mdq-decor {
+  left: 32px;
+  top: 139px;
+}
+
+.mdq-content {
+  position: absolute;
+  top: 139px;
+  right: 40px;
+  width: 798px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* RTL: flex-start = right side */
+  gap: 16px;
+  direction: rtl;
+}
+
+.mdq-title {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--subject-500);
+  text-align: right;
+  width: 100%;
+  margin: 0;
+  line-height: normal;
+}
+
+.mdq-instruction {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #303030;
+  text-align: right;
+  width: 100%;
+  margin: 0;
+  line-height: normal;
+}
+
+.mdq-plain-text {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #303030;
+  text-align: right;
+  width: 100%;
+  margin: 0;
+  line-height: normal;
+}
+
+/* Fill-in-the-blank row: RTL flex — first child = rightmost */
+.mdq-fill-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  direction: rtl;
+}
+
+.mdq-word {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #303030;
+  white-space: nowrap;
+  line-height: 42px;
+}
+
+/* ── Dropdown component ── */
+.mdq-dropdown-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.mdq-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  direction: ltr; /* chevron left, text right */
+  gap: 16px;
+  width: 180px;
+  height: 42px;
+  padding: 0 17px;
+  background: #fff;
+  border: 1px solid rgba(174, 174, 174, 0.5);
+  border-radius: 10px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.mdq-btn:disabled {
+  cursor: default;
+}
+
+.mdq-btn[aria-expanded="true"] {
+  border: 1.5px solid var(--subject-500);
+  /* Paint over the tucked-under top edge of the open list */
+  position: relative;
+  z-index: 31;
+}
+
+.mdq-chevron {
+  flex-shrink: 0;
+  width: 16px;
+  height: 8px;
+  display: block;
+}
+
+.mdq-selected {
+  flex: 1;
+  min-width: 0;
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #303030;
+  text-align: right;
+  direction: rtl;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: normal;
+}
+
+.mdq-btn[data-empty="true"] .mdq-selected {
+  opacity: 0.5;
+}
+
+/* Correct state */
+.mdq-btn.mdq-correct {
+  border: 1.5px solid #609e12;
+  background: #edf8ed;
+}
+
+.mdq-check-ico {
+  flex-shrink: 0;
+}
+
+/* Wrong state */
+.mdq-btn.mdq-wrong {
+  border: 1.5px solid rgba(220, 53, 69, 0.6);
+  background: #fff5f5;
+}
+
+/* ── Dropdown list — attached to the button: tucks 15px behind it, with
+   extra top padding so the first option clears it (Figma 1647-17046) ── */
+.mdq-list {
+  position: absolute;
+  top: calc(100% - 15px);
+  left: 0;
+  width: 180px;
+  background: #fff;
+  border: 1px solid rgba(174, 174, 174, 0.5);
+  border-radius: 8px;
+  padding: 24px 8px 8px;
+  list-style: none;
+  margin: 0;
+  z-index: 30;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.10);
+  direction: rtl;
+}
+
+.mdq-option {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #303030;
+  text-align: center;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mdq-option:hover {
+  background: var(--subject-300);
+}
+
+/* Divider line between options (Figma 1647-17046). The line lives in the
+   margin BETWEEN option boxes (8px each side), so the hover highlight never
+   touches it. */
+.mdq-option + .mdq-option {
+  position: relative;
+  margin-top: 17px; /* 8px + 1px line + 8px */
+}
+
+.mdq-option + .mdq-option::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: #d9d9d9;
+  border-radius: 999px;
+}
+
+/* ── MDQ hint overlay (white backdrop + blue card) ── */
+.mdq-hint-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.mdq-hint-overlay.hidden {
+  display: none !important;
+}
+
+/* ─── SCREEN 11 — TransitionScreen "תרגול סטנדרטי" (S10) ──────── */
+
+#s10 { background: #fff; }
+
+.s10-content {
+  position: absolute;
+  inset: 0 0 74px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.s10-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  direction: rtl;
+}
+
+.s10-subtitle {
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #303030;
+  margin: 0;
+}
+
+.s10-title {
+  font-family: 'Assistant', sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: #303030;
+  margin: 0;
+}
+
+.s10-body {
+  font-family: 'Assistant', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #303030;
+  margin: 0;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.s10-video-wrap {
+  width: 640px;
+  height: 360px;
+  flex-shrink: 0;
+}
+
+.s10-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+#s10-back {
+  position: absolute;
+  bottom: 15px;
+  right: 24px;
+  z-index: 12;
+}
+
+
+/* ─── SCREEN 12 — DragAndDropQuestion "תרגול סטנדרטי" Q1 (S11) ── */
+
+#s11 { background: #fff; }
+
+/* ═══ COMPONENT — Progress Question nav (reusable across all practice screens)
+   Usage: .progress-question container with __item / __connector children.
+   RTL: Q1 first in DOM = physically RIGHT.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.progress-question {
+  position: absolute;
+  top: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: flex-start;
+  direction: rtl;
+}
+
+.progress-question__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 43px;
+  flex-shrink: 0;
+  cursor: default;
+}
+
+/* Status icon — base = not-answered */
+.progress-question__icon {
+  width: 24px; height: 24px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  border: 2px solid #ececec;
+  background: #ffffff;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.progress-question__icon::before {
+  content: '';
+  display: block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #ececec;
+}
+/* Current — Figma 96:809: var(--subject-500) dot (r3.6) > white > var(--subject-500) ring (r8.6, 2px) > var(--subject-300) halo (r12).
+   radial-gradient(circle…) keeps the rings perfectly circular at any scale; no box-shadow layer. */
+.progress-question__icon--current {
+  border: none;
+  background: radial-gradient(circle closest-side,
+    var(--subject-500) 0 30%, #fff 30% 63.33%, var(--subject-500) 63.33% 80%, var(--subject-300) 80% 100%);
+}
+.progress-question__icon--current::before { display: none; }
+.progress-question__icon--correct {
+  background: var(--subject-500); border-color: var(--subject-500);
+}
+.progress-question__icon--correct::before {
+  content: '✓'; width: auto; height: auto;
+  background: none; border-radius: 0;
+  color: #fff; font-size: 13px; font-weight: 700; line-height: 1;
+}
+.progress-question__icon--incorrect {
+  background: var(--subject-500); border-color: var(--subject-500);
+}
+.progress-question__icon--incorrect::before {
+  content: '✕'; width: auto; height: auto;
+  background: none; border-radius: 0;
+  color: #fff; font-size: 11px; font-weight: 700; line-height: 1;
+}
+
+/* Nav label — base = not-visited */
+.progress-question__label {
+  font-family: 'Assistant', sans-serif;
+  font-size: 15px; font-weight: 400;
+  color: #ececec; text-align: right;
+  width: 43px; white-space: nowrap;
+  direction: rtl; display: block;
+}
+.progress-question__label--visited {
+  color: #303030; text-align: center;
+}
+
+/* Connector — base = not-visited */
+.progress-question__connector {
+  width: 64px; flex-shrink: 0;
+  padding-top: 11.5px; box-sizing: content-box;
+}
+.progress-question__connector::after {
+  content: ''; display: block;
+  height: 1.5px; border-radius: 2px; background: #ececec;
+}
+.progress-question__connector--visited::after {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* Question area — top:139px to bottom bar */
+.s11-question-area {
+  position: absolute;
+  top: 139px;
+  right: 40px;
+  left: 40px;
+  bottom: 74px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  direction: rtl;
+}
+
+.s11-title {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--subject-500);
+  margin: 0;
+  max-width: 792px;
+}
+
+.s11-subtitle {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #303030;
+  margin: 0;
+}
+
+/* Main content row: targets (left) + source tray (right) */
+.s11ddq-main-row {
+  display: flex;
+  flex-direction: row;
+  gap: 113px;
+  direction: ltr;
+  align-items: flex-start;
+  justify-content: space-between;   /* source pinned left, targets/numbers pinned to the right edge (aligned with the question text) */
+  margin-top: 16px;
+}
+
+/* Source tray */
+.s11ddq-source {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex-shrink: 0;
+  min-width: 521px;
+}
+
+.s11ddq-source-slot {
+  width: 521px;
+  height: 52px;
+}
+
+.s11ddq-drag-card {
+  width: 100%;
+  height: 52px;
+  border: 1px solid rgba(174,174,174,0.5);
+  border-radius: 12px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 20px;
+  cursor: grab;
+  direction: rtl;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+
+/* Placeholder left behind once the item is dropped — HIDDEN (keeps its slot
+   space so the tray order stays stable, but the learner never sees it) */
+.s11ddq-drag-card.ghost {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.s11ddq-drag-card.ghost .s11ddq-card-text {
+  visibility: hidden;
+}
+
+.s11ddq-drag-card.dragging {
+  opacity: 0.4;
+}
+
+/* Selected state — the floating drag clone gets a תכלת (light-blue) stroke */
+.s11ddq-drag-card.pointer-drag-ghost,
+.s11ddq-placed-card.pointer-drag-ghost {
+  background: #fff;
+  border: 1.5px solid var(--subject-500);
+}
+
+.s11ddq-drag-card.locked {
+  cursor: default;
+}
+
+.s11ddq-card-text {
+  font-family: 'Assistant', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: #222222;
+  text-align: right;
+  direction: rtl;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+/* Targets column */
+.s11ddq-targets-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+/* Each target row: [target-zone][gap-10px][badge] in LTR order */
+.s11ddq-target-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  direction: ltr;
+}
+
+.s11ddq-target {
+  width: 521px;
+  flex: 0 0 521px;
+  height: 52px;
+  border: 1px dashed rgba(0,0,0,0.6);
+  border-radius: 12px;
+  background: #f3f4f5;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Number badge lives OUTSIDE the target zone, to the right */
+.s11ddq-num-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--subject-500);
+  color: #fff;
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.s11ddq-target.occupied {
+  border: 1.5px solid var(--subject-500);
+  background: var(--subject-100);
+}
+
+.s11ddq-target.drag-over {
+  border: 1.5px dashed var(--subject-500);
+  background: #fff;
+}
+
+.s11ddq-target.s11ddq-correct {
+  border: 1.5px solid #609e12 !important;
+  background: #edf8ed !important;
+}
+
+.s11ddq-target.s11ddq-wrong {
+  border: 1.5px solid #b20010 !important;
+  background: #fff5f5 !important;
+}
+
+/* Placed card inside a drop zone — fills the entire target zone.
+   Transparent so the zone state fill (תכלת dropped / green / red) shows through. */
+.s11ddq-placed-card {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border-radius: 12px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  direction: ltr;
+  cursor: grab;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.s11ddq-placed-card[draggable="false"] {
+  cursor: default;
+}
+
+/* Feedback icon circles (26px) — injected inside placed cards on check */
+.s11ddq-placed-ficon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.s11ddq-placed-ficon--correct {
+  background: #609e12;
+}
+
+.s11ddq-placed-ficon--correct::after {
+  content: '✓';
+}
+
+.s11ddq-placed-ficon--wrong {
+  background: #b20010;
+}
+
+.s11ddq-placed-ficon--wrong::after {
+  content: '✕';
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   S12 — Question 2 — SingleChoiceQuestion with Speech Bubbles
+   ═══════════════════════════════════════════════════════════ */
+
+#s12 { background: #fff; }
+
+/* Question container: flex-row LTR, full 491px height (Figma: h:491px)
+   gap:28px matches Figma slot gap */
+#s12 .scq-question {
+  position: absolute;
+  top: 139px; left: 40px; right: 40px; width: auto;
+  height: 491px;
+  display: flex;
+  flex-direction: row;
+  direction: ltr;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 28px;
+}
+
+/* ── Left column ──
+   Full 491px height, image frame pushed to bottom via justify-end.
+   position:relative so speech bubbles anchor to this container. */
+.s12q-left {
+  position: relative;
+  flex-shrink: 0;
+  width: 380px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Image frame outer: 380×380, 8px padding (Figma: p:[8px] overflow-clip) */
+.s12q-frame {
+  width: 380px;
+  height: 380px;
+  flex-shrink: 0;
+  padding: 8px;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;   /* anchor only — NOT a stacking context, so the zoom button rises above the bubbles */
+}
+
+/* Inner border rectangle (Figma: border rgba(0,0,0,0.6) r:16px, fills padding area) */
+.s12q-frame-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;            /* anchor for the zoom button */
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.s12q-frame-inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.img-zoom-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--subject-500);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--subject-500);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 10;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  pointer-events: auto;
+}
+
+/* Hover (Figma Zoom component, State=Hover): solid Subject/500 circle,
+   white icon. Border keeps the fill color so the 44px size doesn't shift. */
+.img-zoom-btn:hover {
+  background: var(--subject-500);
+  border-color: var(--subject-500);
+  color: #fff;
+}
+
+/* Magnifying-glass SVG icon — stroke uses currentColor, inherited from
+   the button's color (Subject/500, Science: var(--subject-500)) */
+.img-zoom-btn__icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.img-zoom-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+}
+
+.img-zoom-modal.hidden {
+  display: none !important;
+}
+
+.img-zoom-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.img-zoom-modal__panel {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  width: 660px;
+  height: 660px;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.img-zoom-modal__stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* The enlarged view is a clone of the image wrapper (image + name tags),
+   scaled up. Speech bubbles live outside the wrapper, so they are excluded. */
+.img-zoom-modal__stage > .img-zoom-clone {
+  width: 364px;
+  height: 364px;
+  flex: none;
+  border: none;
+  transform: scale(1.7);
+  transform-origin: center;
+}
+
+.img-zoom-modal__close {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--subject-500);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--subject-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.img-zoom-modal__close:hover {
+  background: var(--subject-500);
+  border-color: var(--subject-500);
+  color: #fff;
+}
+
+/* X icon — 15×15 vector from the Figma Close component, uses currentColor */
+.img-zoom-modal__close-icon {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+/* ── Reusable speech bubble component ──
+   Width and position set via inline style on each instance.
+   Height is content-driven (auto grows with text).
+   Tail position stays attached at bottom center. */
+.speech-bubble {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px;
+  box-sizing: border-box;
+  z-index: 3;            /* stay above the image frame + zoom button */
+}
+
+/* Bubble frame: white bg + Subject/500 stroke (same style as the s10 bubble). */
+.speech-bubble__frame {
+  background: #fff;
+  border: 3px solid var(--subject-500);
+  border-radius: 16px;
+  padding: 16px 5px;     /* 8px Figma inset minus the 3px stroke: text column keeps its width */
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+}
+
+/* Bubble text: 20px regular, RTL */
+.speech-bubble__text {
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #303030;
+  text-align: right;
+  direction: rtl;
+  line-height: 1.4;
+  margin: 0;
+  word-break: break-word;
+}
+
+/* Bubble tail: down-pointing beak with the same white fill + blue stroke.
+   Two stacked CSS border-triangles: a blue one whose top edge sits flush on
+   the frame's outer border line, and a white one shifted up 4.25px (3px
+   perpendicular at 45°) that opens the frame's bottom border across the
+   beak, leaving a continuous 3px outline with no spikes at the corners. */
+.speech-bubble__tail {
+  width: 56px;
+  height: 28px;
+  position: relative;
+  flex-shrink: 0;
+  z-index: 2;            /* white inner triangle must paint over the frame border */
+}
+
+.speech-bubble__tail::before,
+.speech-bubble__tail::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  border-left: 28px solid transparent;
+  border-right: 28px solid transparent;
+}
+
+.speech-bubble__tail::before {
+  top: 0;
+  border-top: 28px solid var(--subject-500);
+}
+
+.speech-bubble__tail::after {
+  top: -4.25px;
+  border-top: 28px solid #fff;
+}
+
+/* ── Right column ── */
+.s12q-right {
+  flex: 1 0 0;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 36px;
+  padding-top: 0;
+  justify-content: flex-start;
+}
+
+#s12 .scq-qtext {
+  position: relative;
+  right: auto;
+  top: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;      /* Figma: gap:16px between title and body group */
+  padding-top: 0;
+}
+
+.s12q-qtitle {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--subject-500);
+  text-align: right;
+  direction: rtl;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Body group: wraps the two-paragraph block, gap:24px between them */
+.s12q-qbody-group {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.s12q-qbody {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #303030;
+  text-align: right;
+  direction: rtl;
+  margin: 0;
+  line-height: 1.4;
+  width: 100%;
+}
+
+/* Bold question line (Figma: Assistant Bold 24px) */
+.s12q-qquestion {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #303030;
+  text-align: right;
+  direction: rtl;
+  margin: 0;
+  line-height: 1.4;
+  width: 100%;
+}
+
+/* Answers: 604px wide, gap:12px (Figma) */
+#s12 .scq-answers {
+  position: relative;
+  right: auto;
+  top: auto;
+  width: 604px;
+  gap: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   S13 — MeasurementWidget
+   ═══════════════════════════════════════════════════════════ */
+
+.s13-content {
+  position: absolute;
+  top: 131px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 25px;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 0 40px;
+}
+
+/* ── Left column: scale + tray ── */
+.s13-scale-col {
+  width: 410px;
+  height: 491px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.s13-drag-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 383px;
+}
+
+/* Scale image container: 464px asset, centered in the column (not clipped) */
+.s13-scale-bg-container {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 464px;
+  height: 464px;
+  pointer-events: none;
+}
+
+.s13-scale-bg-img {
+  position: absolute;
+  left: 2.76%;
+  top: 0;
+  width: 100%;
+  height: auto;
+  max-width: none;
+}
+
+/* Digital display: centered on the LCD screen of the scale image */
+.s13-display {
+  position: absolute;
+  left: 217.63px; /* scale-image center within the column */
+  top: 272.26px;
+  transform: translate(-50%, -50%);
+  width: 209px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: #303030;
+  text-align: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Reset button: centered below the LCD screen, aligned with the display. */
+.s13-reset-btn {
+  position: absolute;
+  left: 217.63px;
+  top: 320.5px;
+  transform: translate(-50%, -50%);
+  width: 125px;
+  height: 32.991px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  overflow: visible;
+  z-index: 3;
+}
+
+.s13-reset-btn-bg {
+  position: absolute;
+  height: 216.35%;
+  left: 5.23%;
+  top: -59.21%;
+  width: 90.4%;
+  max-width: none;
+  pointer-events: none;
+}
+
+.s13-reset-btn span {
+  position: relative;
+  z-index: 1;
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: white;
+  text-align: center;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.s13-reset-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Tray: bottom portion of scale-col where weight lives when not on scale */
+.s13-tray {
+  position: absolute;
+  top: 403px;
+  left: 217.63px; /* centered on the איפוס reset button's x axis */
+  transform: translateX(-50%);
+  height: 88px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Weight token: 88×88px rounded, image + label overlay */
+.s13-weight {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: grab;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.s13-weight-inner {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.s13-weight-inner img {
+  position: absolute;
+  left: -30.74%;
+  top: -30.74%;
+  width: 161.48%;
+  height: 161.48%;
+  max-width: none;
+}
+
+.s13-weight-label {
+  position: relative;
+  top: 10px;
+  z-index: 1;
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: white;
+  text-align: center;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ── Right column: question text + inputs ── */
+.s13-question-col {
+  flex: 1 0 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 0 40px;
+  gap: 24px;
+}
+
+.s13-text-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.s13-title {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--subject-500);
+  text-align: right;
+  direction: rtl;
+  margin: 0;
+}
+
+.s13-body {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #303030;
+  text-align: right;
+  direction: rtl;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.s13-inputs-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.s13-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  direction: rtl;
+  justify-content: flex-start;
+}
+
+.s13-word {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #303030;
+  direction: rtl;
+  white-space: nowrap;
+}
+
+/* Input box */
+.s13-input {
+  width: 180px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid rgba(174, 174, 174, 0.5);
+  padding: 0 16px;
+  box-sizing: border-box;
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  text-align: right;
+  direction: rtl;
+  color: #303030;
+  background: white;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.s13-input::-webkit-outer-spin-button,
+.s13-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.s13-input:disabled {
+  background: white;
+  color: rgba(48, 48, 48, 0.3);
+  cursor: default;
+}
+
+.s13-input.active  { border: 1.5px solid var(--subject-500); }
+.s13-input.error   { border: 1.5px solid #e53935; }
+.s13-input.locked  { border: 1px solid rgba(174, 174, 174, 0.5); color: #303030; }
+
+/* Continue button (class-toggled enabled/disabled, reuses scq-bar layout) */
+.s13-continue {
+  width: 140px;
+  padding: 12px 40px;
+  border: none;
+  border-radius: 1000px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  direction: rtl;
+  white-space: nowrap;
+}
+
+.s13-continue.disabled {
+  background: #aeaeae;
+  color: #303030;
+  cursor: default;
+  pointer-events: none;
+}
+
+.s13-continue:not(.disabled) {
+  background: linear-gradient(180deg, #005FBE 9%, #0059B2 23.36%, #003971 100%);
+  color: white;
+  cursor: pointer;
+}
+
+.s13-continue:not(.disabled):hover { font-weight: 600; }
+
+/* ═══════════════════════════════════════════════════════════
+   S14 — Q3 Practice SingleChoice (text-only, no image column)
+   Reuses all .scq-* shared styles. Only layout overrides here.
+   ═══════════════════════════════════════════════════════════ */
+
+.s14q-question {
+  position: absolute;
+  top: 131px; left: 0; right: 0;
+  display: flex; flex-direction: column;
+  align-items: flex-end; gap: 24px;
+  padding: 0 80px;
+}
+
+.s14q-qtext {
+  width: 100%;
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+.s14q-qtitle {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 700;
+  color: var(--subject-500);
+  text-align: right; direction: rtl;
+  margin: 0;
+}
+
+.s14q-qbody-group {
+  display: flex; flex-direction: column; gap: 24px;
+  align-items: flex-end; width: 100%;
+}
+
+.s14q-qbody {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 400;
+  color: #303030;
+  text-align: right; direction: rtl;
+  margin: 0; line-height: 1.4; width: 100%;
+}
+
+.s14q-qquestion {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 700;
+  color: #303030;
+  text-align: right; direction: rtl;
+  margin: 0; line-height: 1.4; width: 100%;
+}
+
+/* Override .scq-answers absolute positioning for S14 text-only layout */
+#s14 .scq-answers {
+  position: relative; right: auto; top: auto;
+  width: 100%; gap: 12px;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   S15 — Q3 Practice FlipCardsReveal (clone of S2 layout)
+   ═══════════════════════════════════════════════════════ */
+#s15 { background: #fff; }
+
+#s15 .option-cards { gap: 100px; }
+
+#s15 .select-content { gap: 30px; top: 378px; }
+
+/* Card cell: flip card with a title beneath it */
+#s15 .frc-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+#s15 .frc-card-title {
+  margin: 0;
+  font-family: 'Assistant', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #303030;
+  direction: rtl;
+  text-align: center;
+}
+
+/* Flip-card back text centered (S15) */
+#s15 .frc-card-back-content { text-align: right; }
+
+/* Back button placement matches S2 */
+#s15-back {
+  position: absolute;
+  bottom: 15px; right: 24px;
+  z-index: 12;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   S16 — SCORED Question 3 — DragAndDropQuestion (image variant)
+   Cloned from S3 image-DDQ styles + S11 per-zone feedback icons.
+   Namespaced .s16ddq-* so S3 (.ddq-*) and S11 (.s11ddq-*) untouched.
+   ═══════════════════════════════════════════════════════ */
+#s16 { background: #fff; }
+
+/* Content block — centered above the bar, below the progress nav */
+.s16ddq-content {
+  position: absolute;
+  left: 50%; top: calc(50% - 10px);
+  transform: translate(-50%, -50%);
+  width: 1090px;
+  display: flex; flex-direction: column; align-items: center; gap: 30px;
+}
+
+/* Text header — title (blue) + instruction subtitle */
+.s16ddq-header {
+  display: flex; flex-direction: column; gap: 8px;
+  align-items: stretch; width: 100%; padding: 0 10px;
+}
+.s16ddq-title {
+  width: 100%; text-align: right;
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 700; color: var(--subject-500);
+  direction: rtl; line-height: 1.1; margin: 0;
+}
+.s16ddq-subtitle {
+  width: 100%; text-align: right;
+  font-family: 'Assistant', sans-serif;
+  font-size: 26px; font-weight: 400; color: #303030;
+  direction: rtl; line-height: 1.2; margin: 0;
+}
+
+/* Draggable text descriptions row */
+.s16ddq-source {
+  display: flex; gap: 75px; justify-content: center;
+  direction: ltr;
+}
+.s16ddq-source-slot {
+  width: 216px; height: 42px; flex-shrink: 0;
+}
+
+/* Draggable text card */
+.s16ddq-drag-card {
+  width: 216px; height: 42px;
+  border: 1px solid rgba(174, 174, 174, 0.5);
+  border-radius: 10px; overflow: hidden;
+  background: #fff; cursor: grab;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 16px; box-sizing: border-box;
+  user-select: none; transition: none;
+}
+.s16ddq-card-text {
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px; font-weight: 400; color: #303030;
+  direction: rtl; text-align: center; white-space: nowrap;
+  pointer-events: none; user-select: none;
+}
+/* Placeholder left behind once the item is dropped — HIDDEN (keeps slot space) */
+.s16ddq-drag-card.ghost {
+  visibility: hidden;
+}
+.s16ddq-drag-card.ghost .s16ddq-card-text { display: none; }
+.s16ddq-drag-card.dragging { opacity: 0.3; cursor: grabbing; }
+.s16ddq-drag-card.locked { cursor: default; }
+/* Selected state — the floating drag clone gets a תכלת (light-blue) stroke */
+.s16ddq-drag-card.pointer-drag-ghost,
+.s16ddq-placed-card.pointer-drag-ghost {
+  background: #fff;
+  border: 1.5px solid var(--subject-500);
+}
+
+/* Targets row — fixed image, drop zone beneath */
+.s16ddq-targets-row {
+  display: flex; gap: 75px; justify-content: center;
+  direction: ltr;
+}
+.s16ddq-target-col {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  width: 216px;
+}
+
+/* Fixed target image frame */
+.s16ddq-img-frame {
+  width: 216px; height: 216px;
+  border: 3px solid rgba(201, 206, 216, 0.4);
+  border-radius: 16px; background: #fff;
+  overflow: hidden; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.s16ddq-target-img {
+  width: 100%; height: 100%;
+  object-fit: cover; border-radius: 13px;
+  display: block; pointer-events: none; user-select: none;
+}
+
+/* Drop target zone — sized to match the text box */
+.s16ddq-target {
+  width: 216px; height: 42px;
+  border: 1.5px dashed rgba(0,0,0,0.6);
+  border-radius: 10px; background: #f3f4f5;
+  position: relative; overflow: hidden;
+  flex-shrink: 0; transition: none;
+  display: flex; align-items: center; justify-content: center;
+}
+/* Drag-over (Hover): dashed line turns תכלת (light-blue), white fill */
+.s16ddq-target.drag-over {
+  background: #fff;
+  border: 2px dashed var(--subject-500);
+}
+/* Occupied (Dropped): תכלת fill + stroke */
+.s16ddq-target.occupied { background: var(--subject-100); border: 1.5px solid var(--subject-500); }
+.s16ddq-target.s16ddq-correct {
+  background: #fff;
+  border: 2px solid #609e12 !important;
+}
+.s16ddq-target.s16ddq-wrong {
+  background: #fff;
+  border: 2px solid #b20010 !important;
+}
+
+/* Placed card — same text box as the draggable, injected by render.
+   Inline layout (icon + text side-by-side, like S11) so the feedback
+   icon never overlaps the label. */
+.s16ddq-placed-card {
+  width: 216px; height: 42px;
+  border: none;
+  border-radius: 10px; overflow: hidden;
+  background: transparent;   /* zone state fill (תכלת / green / red) shows through */
+  display: flex; align-items: center; gap: 8px;
+  direction: rtl;
+  padding: 0 12px; box-sizing: border-box;
+  flex-shrink: 0; cursor: grab;
+  position: relative;
+}
+.s16ddq-placed-card.dragging { opacity: 0.3; cursor: grabbing; }
+.s16ddq-placed-card[draggable="false"] { cursor: default; }
+/* Placed label shrinks slightly to sit alongside the feedback icon */
+.s16ddq-placed-card .s16ddq-card-text {
+  flex: 1; min-width: 0;
+  font-size: 20px; text-align: center;
+  overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Per-zone feedback icon (inline ✓/✕ circle, reading-start / right in RTL) */
+.s16ddq-placed-ficon {
+  order: -1;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff;
+}
+.s16ddq-placed-ficon--correct { background: #609e12; }
+.s16ddq-placed-ficon--correct::after { content: '✓'; }
+.s16ddq-placed-ficon--wrong { background: #b20010; }
+.s16ddq-placed-ficon--wrong::after { content: '✕'; }
+
+/* Target label */
+.s16ddq-target-label {
+  font-family: 'Assistant', sans-serif;
+  font-size: 22px; font-weight: 700; color: #303030;
+  text-align: center; direction: rtl; margin: 0;
+  width: 190px;
+}
+
+/* Back button in S16 */
+#s16-back {
+  position: absolute;
+  bottom: 15px; right: 24px;
+  z-index: 12;
+}
+
+/* ═══════════════════════════════════════════════════════
+   S17 — StandardPractice Q4 — Scale recap + SingleChoiceQuestion
+   Disabled S13 scale widget (left) + read-only measurements +
+   SingleChoiceQuestion radio pills (right, reuses .scq-opt).
+   ═══════════════════════════════════════════════════════ */
+#s17 { background: #fff; }
+
+/* Main content row: question (RIGHT) + scale widget (LEFT), inherits RTL */
+.s17-content {
+  position: absolute;
+  top: 131px; left: 0; right: 0;
+  display: flex; flex-direction: row;
+  gap: 25px;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 0 40px;
+}
+
+/* Left scale widget — visually identical to S13, but inert (disabled) */
+.s17-scale-col { cursor: default; }
+#s17 .s13-weight { cursor: default; }
+#s17 .s13-reset-btn { pointer-events: none; }
+
+/* Right question column */
+.s17q-right {
+  flex: 1 0 0; min-width: 0;
+  display: flex; flex-direction: column;
+  align-items: flex-end;
+  gap: 35px;
+}
+
+.s17q-block {
+  display: flex; flex-direction: column;
+  gap: 25px; align-items: flex-end; width: 100%;
+}
+.s17q-textblock {
+  display: flex; flex-direction: column;
+  gap: 16px; align-items: flex-end; width: 100%;
+}
+.s17q-title {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 700; color: var(--subject-500);
+  text-align: right; direction: rtl; margin: 0; width: 100%;
+}
+.s17q-subtitle {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 400; color: #303030;
+  text-align: right; direction: rtl; margin: 0; width: 100%;
+}
+
+/* Read-only measurements row (RTL: מדידה N · box · גר') */
+.s17q-measures {
+  display: flex; direction: rtl;
+  gap: 50px; align-items: center; flex-wrap: wrap;
+  justify-content: flex-start; width: 100%;
+}
+.s17q-measure {
+  display: flex; direction: rtl;
+  align-items: center; gap: 12px;
+}
+.s17q-mlabel, .s17q-munit {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 400; color: #303030;
+  white-space: nowrap;
+}
+.s17q-mbox {
+  height: 42px; box-sizing: border-box;
+  min-width: 56px; padding: 0 16px;
+  border: 1px solid rgba(174, 174, 174, 0.5);
+  border-radius: 10px; background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 400; color: #303030;
+}
+
+/* Question + answers */
+.s17q-qblock {
+  display: flex; flex-direction: column;
+  gap: 24px; align-items: flex-end; width: 100%;
+}
+.s17q-question {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 700; color: #303030;
+  text-align: right; direction: rtl; margin: 0; width: 100%;
+}
+#s17 .scq-answers {
+  position: relative; right: auto; top: auto;
+  width: 604px;
+  align-self: flex-start;   /* RTL column → pin to the right, aligned with the text */
+}
+#s17 .scq-opt { width: 100%; }
+
+/* ═══════════════════════════════════════════════════════
+   S18 — StandardPractice Q5 — SingleChoiceQuestion ("ממוצע מדידות")
+   Right-aligned question column, reuses .scq-opt pills.
+   ═══════════════════════════════════════════════════════ */
+#s18 { background: #fff; }
+
+.s18q-content {
+  position: absolute;
+  top: 139px; left: 0; right: 0;
+  padding: 0 40px;
+}
+.s18q-col {
+  display: flex; flex-direction: column;
+  gap: 24px; align-items: flex-start; width: 100%;
+}
+.s18q-text {
+  display: flex; flex-direction: column;
+  gap: 16px; align-items: flex-end; width: 792px;
+}
+.s18q-title {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 700; color: var(--subject-500);
+  text-align: right; direction: rtl; margin: 0; width: 100%;
+}
+.s18q-bodygroup {
+  display: flex; flex-direction: column;
+  gap: 24px; align-items: flex-end; width: 100%;
+}
+.s18q-body {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 400; color: #303030;
+  text-align: right; direction: rtl; margin: 0; width: 100%;
+  line-height: 1.4;
+}
+.s18q-question {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 700; color: #303030;
+  text-align: right; direction: rtl; margin: 0; width: 100%;
+  line-height: 1.4;
+}
+#s18 .scq-answers {
+  position: relative; right: auto; top: auto;
+  width: 604px;
+}
+#s18 .scq-opt { width: 100%; }
+
+.s18-remember-stage {
+  position: absolute;
+  left: 395px;
+  top: 336px;
+  width: 332px;
+  height: 296px;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.s18-remember-video {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 232px;
+  height: 176px;
+  display: block;
+  transform: translateX(-50%);
+  object-fit: contain;
+}
+
+.s18-remember-bubble {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 250px;
+  min-height: 86px;
+  padding: 18px 18px 26px;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='86' viewBox='0 0 250 86'%3E%3Cpath fill='%23019de5' d='M15 1h220a14 14 0 0 1 14 14v46a14 14 0 0 1-14 14h-48.8L125 84.5 93.8 75H15A14 14 0 0 1 1 61V15A14 14 0 0 1 15 1Z'/%3E%3Cpath fill='%23fff' d='M17 4h216a11 11 0 0 1 11 11v44a11 11 0 0 1-11 11h-51.5L125 77.5 97.5 70H17A11 11 0 0 1 6 59V15A11 11 0 0 1 17 4Z'/%3E%3C/svg%3E") no-repeat center center / 100% 100%;
+  z-index: 7;
+}
+
+.s18-remember-bubble::before,
+.s18-remember-bubble::after {
+  content: none;
+}
+
+.s18-remember-bubble-text {
+  display: block;
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #000;
+  text-align: center;
+  direction: rtl;
+  line-height: 1.25;
+}
+
+/* ═══════════════════════════════════════════════════════
+   S19 — Q5 (section ב) SingleChoiceQuestion — clone of S18 layout
+   ═══════════════════════════════════════════════════════ */
+.s19q-content {
+  position: absolute;
+  top: 139px; left: 0; right: 0;
+  padding: 0 40px;
+}
+.s19q-col {
+  display: flex; flex-direction: column;
+  gap: 24px; align-items: flex-start; width: 100%;
+}
+.s19q-text {
+  display: flex; flex-direction: column;
+  gap: 16px; align-items: flex-end; width: 792px;
+}
+.s19q-title {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 700; color: var(--subject-500);
+  text-align: right; direction: rtl; margin: 0; width: 100%;
+}
+.s19q-bodygroup {
+  display: flex; flex-direction: column;
+  gap: 24px; align-items: flex-end; width: 100%;
+}
+.s19q-body {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 400; color: #303030;
+  text-align: right; direction: rtl; margin: 0; width: 100%;
+  line-height: 1.4;
+}
+.s19q-question {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 700; color: #303030;
+  text-align: right; direction: rtl; margin: 0; width: 100%;
+  line-height: 1.4;
+}
+#s19 .scq-answers {
+  position: relative; right: auto; top: auto;
+  width: 604px;
+}
+#s19 .scq-opt { width: 100%; }
+
+/* ═══════════════════ BLOCK F — REPORT MODAL CSS ═══════════════════ */
+.report-modal-overlay { position: absolute; inset: 0; z-index: 200; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; direction: rtl; }
+.report-modal-overlay[hidden] { display: none; }
+.report-modal-box { width: 520px; background: #ffffff; border-radius: 16px; padding: 36px 36px 28px; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 18px; direction: rtl; }
+.report-confirm-box { width: 420px; padding: 40px 36px 32px; gap: 20px; }
+.report-close-btn { position: absolute; top: 14px; left: 14px; width: 32px; height: 32px; border: none; background: none; font-size: 17px; color: #8A9AAA; cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center; outline: none; transition: background 0.12s, color 0.12s; }
+.report-close-btn:hover { background: #F0F2F5; color: #303030; }
+.report-close-btn:focus-visible { outline: 2px solid #8900E1; }
+.report-modal-title { font-size: 26px; font-weight: 700; color: #1A2744; line-height: 1.2; }
+.report-modal-body { font-size: 18px; color: #5A6A7A; line-height: 1.5; margin-top: -6px; }
+.report-field { display: flex; flex-direction: column; gap: 6px; }
+.report-label { font-size: 16px; font-weight: 600; color: #303030; }
+.required-star { color: #D32F2F; }
+.report-select { height: 44px; border: 2px solid #C9CED8; border-radius: 10px; padding: 0 14px; font-family: 'Assistant', sans-serif; font-size: 17px; color: #303030; background: #ffffff; direction: rtl; outline: none; cursor: pointer; transition: border-color 0.12s; }
+.report-select:focus { border-color: #8900E1; }
+.report-textarea { border: 2px solid #C9CED8; border-radius: 10px; padding: 12px 14px; font-family: 'Assistant', sans-serif; font-size: 16px; color: #303030; direction: rtl; resize: none; outline: none; transition: border-color 0.12s; line-height: 1.5; }
+.report-textarea:focus { border-color: #8900E1; }
+.report-char-count { font-size: 13px; color: #8A9AAA; text-align: left; direction: ltr; }
+.report-actions { display: flex; flex-direction: row; gap: 12px; direction: rtl; margin-top: 4px; }
+.report-error { color: #d33; font-size: 14px; margin: 4px 0 8px; direction: rtl; }
+.report-thanks { text-align: center; padding: 8px 0; direction: rtl; }
+.report-submit-btn { height: 44px; padding: 0 32px; background: linear-gradient(180deg, #8900E1 9%, #6500A5 100%); color: #ffffff; border: none; border-radius: 50px; font-family: 'Assistant', sans-serif; font-size: 18px; font-weight: 600; cursor: pointer; outline: none; transition: opacity 0.12s; }
+.report-submit-btn:hover { opacity: 0.88; }
+.report-submit-btn:focus-visible { outline: 3px solid #8900E1; outline-offset: 3px; }
+.report-cancel-btn { height: 44px; padding: 0 28px; background: #ffffff; color: #5A6A7A; border: 2px solid #C9CED8; border-radius: 50px; font-family: 'Assistant', sans-serif; font-size: 18px; font-weight: 400; cursor: pointer; outline: none; transition: border-color 0.12s, color 0.12s; }
+.report-cancel-btn:hover { border-color: #8A9AAA; color: #303030; }
+.report-cancel-btn:focus-visible { outline: 3px solid #8900E1; outline-offset: 3px; }

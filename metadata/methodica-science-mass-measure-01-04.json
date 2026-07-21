@@ -1,0 +1,121 @@
+{
+  "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-04",
+  "title": "שאלות מתקדמות — מסה עקיפה ומסת אוויר",
+  "learningUnitId": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01",
+  "componentPurpose": "practice",
+  "isAssessment": false,
+  "manufacture": "methodica",
+  "isRequired": true,
+  "order": 4,
+  "languages": [
+    "Hebrew"
+  ],
+  "skills": [],
+  "estimatedTimeInMinutes": 15,
+  "subContent": [
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-04-001",
+      "title": "פתיחה — שלוש שאלות מתקדמות (וידאו)",
+      "informationToBot": "מסך מעבר עם סרטון: פתיח לשאלות מתקדמות. אין הערכה.",
+      "contentType": "Motivational",
+      "mediaFormat": "Video",
+      "questions": []
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-04-002",
+      "title": "שאלה 1 — חישוב מסה עקיפה",
+      "informationToBot": "תרגול יישומון (שקילת כוס ריקה 40 גר', ומלאה 115 גר') ואז שאלה: מסת הנוזל לבדו = 115-40 = 75 גרם. טעות נפוצה: בחירה בערך הכולל או הריק.",
+      "contentType": "Practice",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "choice",
+          "questionText": "לפניכם המדידות (מדידה 1: 40 גר', מדידה 2: 115 גר'). מהי המסה האמיתית של הנוזל לבדו?",
+          "answers": [
+            "40 גרם",
+            "115 גרם",
+            "75 גרם",
+            "155 גרם"
+          ],
+          "correctAnswers": [
+            "75 גרם"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-04-003",
+      "title": "שאלה 2 — מסה של אוויר",
+      "informationToBot": "תרגול שקילת בלון ריק (ממוצע 3.2) ומנופח (ממוצע 3.6) שלוש פעמים כל אחד, ואז שאלה: המסקנה הנתמכת בנתונים היא שלאוויר יש מסה.",
+      "contentType": "Practice",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "choice",
+          "questionText": "איזו מסקנה נתמכת בצורה הטובה ביותר על ידי הנתונים (ממוצע בלון ריק 3.2, מנופח 3.6)?",
+          "answers": [
+            "הבלון המנופח גדול יותר, הוא דוחף את האוויר שבינו ובין המאזניים ומשפיע על המדידות.",
+            "לחץ האוויר בתוך הבלון מותח את הגומי ומגדיל את המסה שלו",
+            "הנתונים מחזקים את הטענה שלאוויר יש מסה",
+            "ההפרש קטן מדי. צריך לבצע עוד מדידות כדי להסיק מסקנה סופית"
+          ],
+          "correctAnswers": [
+            "הנתונים מחזקים את הטענה שלאוויר יש מסה"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-04-004",
+      "title": "שאלה 3 — איך נכון למדוד?",
+      "informationToBot": "שני סעיפים: סעיף א — האם תמר סיימה את המדידה (לא); סעיף ב — בניית פרוטוקול המדידה הנכון בגרירה וסידור, כולל סינון שלבים לא רלוונטיים. הדירוג לשאלה זו נקבע רק אם שני הסעיפים נכונים.",
+      "contentType": "Practice",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "choice",
+          "questionText": "סעיף א: האם תמר סיימה את המדידה?",
+          "answers": [
+            "כן",
+            "לא"
+          ],
+          "correctAnswers": [
+            "לא"
+          ]
+        },
+        {
+          "questionId": "q2",
+          "questionType": "drag-and-drop",
+          "questionText": "סעיף ב: עזרו לתמר לבנות את פרוטוקול המדידה הנכון. גררו וסדרו לפי הסדר רק את השלבים המתאימים.",
+          "answers": [
+            "לבדוק שהמאזניים מאופסים (מראים 0.00)",
+            "להניח את כוס המדידה על המאזניים",
+            "ללחוץ על כפתור האיפוס",
+            "למזוג מים לכוס המדידה עד שהמאזניים מראים 32 גרם",
+            "לחזור על המדידה 3 פעמים לפחות, ולהשוות בין התוצאות",
+            "לכבות את המאזניים לפני המדידה (מסיח)",
+            "לקרוא את נפח המים בלבד (מסיח)"
+          ],
+          "correctAnswers": [
+            "לבדוק שהמאזניים מאופסים (מראים 0.00)",
+            "להניח את כוס המדידה על המאזניים",
+            "ללחוץ על כפתור האיפוס",
+            "למזוג מים לכוס המדידה עד שהמאזניים מראים 32 גרם",
+            "לחזור על המדידה 3 פעמים לפחות, ולהשוות בין התוצאות"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-04-005",
+      "title": "סיום — הקשר בין מדידה מדויקת לצדק (וידאו)",
+      "informationToBot": "מסך סיום עם סרטון (YouTube): מה הקשר בין מדידה מדויקת וצדק. אין הערכה.",
+      "contentType": "Summary",
+      "mediaFormat": "Video",
+      "questions": []
+    }
+  ]
+}

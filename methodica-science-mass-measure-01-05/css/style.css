@@ -1,0 +1,1073 @@
+/* ═══════════════════════════════════════════════════════
+   css/style.css  —  720 Science · Mass Measurement Lomda
+   Part 05 — שאלת השיא (split out of part 04, screens s9–s15).
+   Canvas: 1280 × 710 px   (matches the 720 reference engine)
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Local fonts (Assistant) ───────────────────────────
+   Loaded from assets/fonts/ — used before Google Fonts CDN.
+   Google Fonts <link> in index.html remains as network fallback.
+   ───────────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'Assistant';
+  src: url('../assets/fonts/Assistant-ExtraLight.ttf') format('truetype');
+  font-weight: 200; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Assistant';
+  src: url('../assets/fonts/Assistant-Light.ttf') format('truetype');
+  font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Assistant';
+  src: url('../assets/fonts/Assistant-Regular.ttf') format('truetype');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Assistant';
+  src: url('../assets/fonts/Assistant-Medium.ttf') format('truetype');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Assistant';
+  src: url('../assets/fonts/Assistant-SemiBold.ttf') format('truetype');
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Assistant';
+  src: url('../assets/fonts/Assistant-Bold.ttf') format('truetype');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Assistant';
+  src: url('../assets/fonts/Assistant-ExtraBold.ttf') format('truetype');
+  font-weight: 800; font-style: normal; font-display: swap;
+}
+
+/* ─── Reset ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Subject theme tokens — Figma Variable Collection (720 UI Templates)
+   Source of truth: Colors System page, Figma eSbp4bKHgBky0rakDb8l9N node 618:10118.
+   Default theme: science. Theme switch = data-subject-theme attribute on <body>;
+   only Subject/* tokens may change between themes. ── */
+:root {
+  --subject-100: #d4f3ff;
+  --subject-200: #c7f0ff;
+  --subject-300: #b9ecff;
+  --subject-400: #00baff;
+  --subject-500: #019de5;
+  --subject-600: #0690d0;
+  --subject-700: #007ac6;
+  --subject-800: #0070c0;
+  --subject-900: #002060;
+  --subject-alpha-100: rgba(0, 186, 255, 0);
+  --subject-alpha-200: rgba(0, 186, 255, 0.3);
+}
+
+body[data-subject-theme="math"] {
+  --subject-100: #f1d9ff;
+  --subject-200: #e7c2ff;
+  --subject-300: #e0bff5;
+  --subject-400: #ce82ff;
+  --subject-500: #7100b9;
+  --subject-600: #8518cc;
+  --subject-700: #8300d9;
+  --subject-800: #7106b7;
+  --subject-900: #580091;
+  --subject-alpha-100: rgba(165, 28, 255, 0);
+  --subject-alpha-200: rgba(165, 28, 255, 0.3);
+}
+
+
+/* ─── Global utility ───────────────────────────────────── */
+.hidden { display: none !important; }
+
+/* ─── Global ────────────────────────────────────────────── */
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  direction: rtl;
+  font-family: 'Assistant', sans-serif;
+  background: #fff;
+}
+
+/* ─── App Canvas ────────────────────────────────────────── */
+#app {
+  position: absolute;
+  width: 1280px; height: 710px;
+  transform-origin: top left;
+  background: #fff;
+  overflow: hidden;
+}
+
+/* ─── Screens ───────────────────────────────────────────── */
+.screen {
+  position: absolute; inset: 0;
+  width: 1280px; height: 710px;
+  display: none; overflow: hidden;
+}
+.screen.active { display: block; }
+
+/* 74px white feedback bar at the bottom of every screen (Figma standard). */
+.screen::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 74px;
+  background: #fff;
+  border-top: 0.4px solid #AEAEAE;
+  pointer-events: none;
+  z-index: 9;
+}
+
+#s0, #s1, #s2, #s3, #s4, #s5, #s6 { background: #fff; }
+
+/* ═══════════════════════════════════════════════════════
+   GLOBAL COMPONENT — Report / Issue button (top-left).
+   Figma "issue button" component (default + hover variants).
+   Appears on every screen. Visual only for now (no behavior).
+   - default: gray circle + flag icon
+   - hover:   blue/white circle + flag icon + "מצאתם בעיה?" label
+   Icon = exact Figma PNG; label = live HTML (never baked in).
+   ═══════════════════════════════════════════════════════ */
+.flag-btn {
+  position: absolute; top: 16px; left: 16px;
+  width: 88px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: none; border: none; padding: 0; cursor: pointer;
+  z-index: 30;          /* above screen content + feedback bar */
+}
+.flag-btn-icon {
+  width: 38px; height: 38px; flex-shrink: 0;
+  background: url('../assets/img/btn-flag-default.png') no-repeat center / contain;
+}
+.flag-btn:hover .flag-btn-icon,
+.flag-btn:focus-visible .flag-btn-icon {
+  background-image: url('../assets/img/btn-flag-hover.png');
+}
+.flag-btn-label {
+  font-family: 'Assistant', sans-serif;
+  font-weight: 600; font-size: 14px; color: var(--subject-500);
+  text-align: center; width: 80px; line-height: normal;
+  direction: rtl; display: none;
+}
+.flag-btn:hover .flag-btn-label,
+.flag-btn:focus-visible .flag-btn-label { display: block; }
+
+/* ─── Shared: Continue Button — blue pill, bottom-left of bar ── */
+.btn-continue {
+  position: absolute;
+  bottom: 15px; left: 24px;   /* centered in 74px bar: (74-44)/2 = 15px */
+  z-index: 12;                /* above the ::after white bar (z-index 9) */
+  min-width: 140px;
+  padding: 12px 40px;
+  background: linear-gradient(180deg, #005FBE 9%, #0059B2 23.36%, #003971 100%);
+  color: #fff;
+  border: none; border-radius: 1000px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px; font-weight: 400;
+  cursor: pointer; direction: rtl;
+  text-align: center; white-space: nowrap;
+}
+.btn-continue:not(:disabled):hover { font-weight: 600; }
+.btn-continue.hidden { display: none !important; }
+/* Disabled state — gray inactive pill (modeled on the reference צדקתי button) */
+.btn-continue:disabled {
+  background: #AEAEAE;
+  color: #303030;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   TEMPLATE — SingleChoiceQuestion (shared base)
+   Question image + question text + single-choice option pills.
+   Figma: dpY9DTl41tzW8SKvcPWU0C, node 2085:4465.
+   ═══════════════════════════════════════════════════════ */
+
+/* Question block — Figma: top 139px, right 40px, width 1188px */
+.scq-question {
+  position: absolute; top: 139px; right: 40px;
+  width: 1188px; height: auto;
+}
+
+/* Image (left) — 380×380 square, matches Figma media placeholder (node 2185-4203) */
+.scq-img {
+  position: absolute; left: 0; top: 0;
+  width: 380px; height: 380px; padding: 8px;
+}
+.scq-img-inner {
+  width: 100%; height: 100%;
+  position: relative;            /* anchor for the zoom button */
+  background: #fff; border: 0.5px solid rgba(174, 174, 174, 0.5);
+  border-radius: 16px; overflow: hidden;
+}
+.scq-img-inner img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+/* ── Image zoom button + modal (shared component, identical across parts) ── */
+.img-zoom-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--subject-500);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--subject-500);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 10;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  pointer-events: auto;
+}
+/* Hover (Figma Zoom component, State=Hover): solid Subject/500 circle,
+   white icon. Border keeps the fill color so the 44px size doesn't shift. */
+.img-zoom-btn:hover {
+  background: var(--subject-500);
+  border-color: var(--subject-500);
+  color: #fff;
+}
+/* Magnifying-glass SVG icon — stroke uses currentColor, inherited from
+   the button's color (Subject/500, Science: var(--subject-500)) */
+.img-zoom-btn__icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+.img-zoom-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+}
+.img-zoom-modal.hidden {
+  display: none !important;
+}
+.img-zoom-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.78);
+}
+.img-zoom-modal__panel {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  width: 660px;
+  height: 660px;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+.img-zoom-modal__stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+/* The enlarged view is a clone of the image wrapper, scaled up. */
+.img-zoom-modal__stage > .img-zoom-clone {
+  width: 364px;
+  height: 364px;
+  flex: none;
+  border: none;
+  transform: scale(1.7);
+  transform-origin: center;
+}
+/* S3 dropdown frame clone — the #s3-scoped rules don't reach the modal, so
+   restate the frame's rounding and image fit here. */
+.img-zoom-modal__stage > .img-zoom-clone.s12-img-frame {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.img-zoom-modal__stage > .img-zoom-clone.s12-img-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.img-zoom-modal__close {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--subject-500);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--subject-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+.img-zoom-modal__close:hover {
+  background: var(--subject-500);
+  border-color: var(--subject-500);
+  color: #fff;
+}
+/* X icon — 15×15 vector from the Figma Close component, uses currentColor */
+.img-zoom-modal__close-icon {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+/* Question text (right) — vertically centered against the image */
+.scq-qtext {
+  position: absolute; right: 0; top: 0;
+  width: 792px; height: auto;
+  display: flex; flex-direction: column; justify-content: flex-start; gap: 0;
+  padding-top: 16px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 700; color: var(--subject-500);   /* Blue/70, Body/B5 Bold */
+  text-align: right; direction: rtl; line-height: normal;
+}
+
+/* Answers (right, below the question text) */
+.scq-answers {
+  position: absolute; right: 0; top: 100px;
+  width: 604px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.scq-opt {
+  width: 604px; min-height: 46px;
+  border: 2px solid var(--subject-500); border-radius: 1000px;
+  background: #fff; padding: 7px 20px;
+  display: flex; align-items: center; gap: 10px;
+  direction: rtl; cursor: pointer;
+  font-family: 'Assistant', sans-serif;
+  overflow: visible;
+}
+.scq-opt-text {
+  flex: 1; text-align: right;
+  font-size: 22px; font-weight: 400; color: #222; line-height: 1.1;
+}
+.scq-opt:focus-visible { outline: 2px solid var(--subject-700); outline-offset: 2px; }
+.scq-opt:disabled { cursor: default; }
+/* Correct / wrong pill states */
+.scq-opt.correct { background: #edf8ed; border: 2px solid #609e12; }
+.scq-opt.wrong   { background: #fff0f4; border: 2px solid #b20010; }
+
+/* Radio indicator (22px) — RTL: sits on the RIGHT (reading start) of the pill */
+.scq-radio {
+  width: 22px; height: 22px; flex-shrink: 0;
+  border: 2px solid var(--subject-500); border-radius: 1000px;
+  position: relative; box-sizing: border-box;
+  order: -1;   /* first flex item → right edge in the RTL row */
+}
+.scq-opt.selected .scq-radio { background: var(--subject-500); }
+.scq-opt.correct  .scq-radio { background: #609e12; border-color: #609e12; }
+.scq-opt.wrong    .scq-radio { background: #b20010; border-color: #b20010; }
+/* check mark (correct) — centered via transform */
+.scq-opt.correct .scq-radio::after {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  width: 6px; height: 11px;
+  border: solid #fff; border-width: 0 2px 2px 0;
+  transform: translate(-50%, -60%) rotate(45deg);  /* optical center of a checkmark */
+}
+/* X mark (wrong) — two equal bars crossing at the exact circle center */
+.scq-opt.wrong .scq-radio::before,
+.scq-opt.wrong .scq-radio::after {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  width: 11px; height: 2px; background: #fff;
+}
+.scq-opt.wrong .scq-radio::before { transform: translate(-50%, -50%) rotate(45deg); }
+.scq-opt.wrong .scq-radio::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+
+/* Word wrapper that anchors the floating info icon above it.
+   Stays a plain inline box so it never grows the line box / adds vertical gap. */
+.tooltip-word {
+  position: relative;
+}
+
+/* Info icon — absolutely positioned above the left edge of the target word (RTL: final letter) */
+.scq-info {
+  position: absolute;
+  top: -8px; left: 0;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  width: 15px; height: 15px;
+  cursor: help;
+}
+/* Vector icon, not a font character. Figma source of truth:
+   eSbp4bKHgBky0rakDb8l9N node 1580:17042 ("Tooltip",
+   TooltipAllocation=WhiteBg) — self-contained 15×15 asset: the SVG already
+   bakes in the blue circular background and the white "i" path, so no
+   background/border-radius is drawn on `.scq-info` here — a second,
+   independently-sized CSS circle behind the SVG is exactly the kind of
+   drift risk (rounding, anti-aliasing edges) this asset is meant to avoid.
+   (Previously this part used a bordered/unfilled variant — unified to the
+   single approved filled-circle design so every tooltip icon in this
+   project renders identically.) */
+.scq-info-i {
+  display: block;
+  flex: 0 0 15px;
+  width: 15px; height: 15px;
+}
+.scq-tooltip {
+  position: absolute; bottom: calc(100% + 10px);
+  left: 50%; transform: translateX(-50%);   /* centered on the info icon */
+  width: 260px;
+  background: #fff; border: 1px solid #aeaeae; border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  padding: 18px 15px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 18px; font-weight: 400; color: #222;
+  text-align: right; direction: rtl; line-height: normal;
+  display: none; z-index: 40;
+}
+.scq-info:hover .scq-tooltip,
+.scq-info:focus .scq-tooltip,
+.scq-info:focus-within .scq-tooltip { display: block; }
+
+/* Answer option icon sits slightly higher than the popup icon */
+.scq-opt .scq-info { top: -9px; }
+
+/* ── Feedback popup (mirrors ddq-popup style) ── */
+.scq-popup {
+  position: absolute;
+  left: 2px; bottom: 76px;
+  width: 426px;
+  height: auto;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.18);
+  display: flex; flex-direction: column; gap: 4px;
+  direction: rtl; z-index: 50;
+  cursor: move;
+}
+.scq-popup.hidden { display: none !important; }
+.scq-popup-header {
+  display: flex; align-items: flex-start; gap: 8px;
+  direction: ltr;
+  width: 100%;
+}
+.scq-popup-title {
+  flex: 1;
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px; font-weight: 700;
+  text-align: right; direction: rtl;
+  line-height: normal; margin: 0;
+  padding-top: 4px;
+}
+.scq-popup-body { direction: rtl; }
+.scq-popup-body p {
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px; font-weight: 400; color: #222;
+  text-align: right; direction: rtl;
+  line-height: normal; margin: 0 0 4px;
+}
+.scq-popup-body p:last-child { margin-bottom: 0; }
+
+/* Popup close button — 30px circle with an X drawn in CSS */
+.scq-popup-close {
+  position: relative;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #303030;
+  border-radius: 50%;
+  background: #fff;
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  overflow: hidden;
+}
+.scq-popup-close::before,
+.scq-popup-close::after {
+  content: '';
+  position: absolute;
+  width: 11.31px;
+  height: 1.333px;
+  background: #303030;
+  border-radius: 999px;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+}
+.scq-popup-close::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.scq-popup-close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* ── Bottom action bar ── */
+.scq-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 74px;
+  background: #fff; border-top: 0.4px solid #aeaeae;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 34px; direction: ltr;   /* check+hint left, back right */
+  z-index: 15;
+}
+.scq-bar-main { display: flex; align-items: center; gap: 16px; }
+
+.scq-check {
+  min-width: 140px; padding: 12px 40px;
+  border: none; border-radius: 1000px;
+  background: #aeaeae; color: #303030;
+  font-family: 'Assistant', sans-serif; font-size: 20px; font-weight: 400;
+  cursor: not-allowed; direction: rtl; white-space: nowrap;
+  text-align: center;
+}
+.scq-check:not(:disabled) {
+  background: linear-gradient(180deg, #005FBE 9%, #0059B2 23.36%, #003971 100%);
+  color: #fff; cursor: pointer;
+}
+.scq-check:not(:disabled):hover { font-weight: 600; }
+
+.scq-hint {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 20px;
+  border: 1px solid var(--subject-700); border-radius: 1000px; background: #fff;
+  color: var(--subject-700);
+  font-family: 'Assistant', sans-serif; font-size: 20px; font-weight: 400;
+  cursor: pointer; direction: rtl;
+}
+/* Figma 196:6024 — bulb icon sits to the RIGHT of the text (first flex item in RTL) */
+.scq-hint .scq-hint-ico { width: 26px; height: 22.3px; order: -1; }
+/* Figma 1645:18704 — hint hover: text goes SemiBold, border/colors unchanged */
+.scq-hint:hover:not(:disabled) { font-weight: 600; }
+.scq-hint:disabled { border-color: #aeaeae; color: #aeaeae; cursor: default; }
+/* Figma 196:6021 — disabled bulb is solid #aeaeae (black → invert 68.2% = rgb(174,174,174)) */
+.scq-hint:disabled .scq-hint-ico { filter: brightness(0) invert(0.682); }
+
+.scq-back {
+  width: 140px; padding: 12px 40px;
+  border: 1px solid var(--subject-700); border-radius: 1000px; background: #fff;
+  color: var(--subject-700);
+  font-family: 'Assistant', sans-serif; font-size: 20px; font-weight: 400;
+  cursor: pointer; direction: rtl;
+}
+.scq-back:hover { font-weight: 600; border-width: 1.5px; } /* Figma 230:4050 */
+/* Transition/video screens place the back button bare — a direct child of
+   .screen, sibling of .btn-continue — instead of inside a .scq-bar. Anchor it
+   to the bottom-right, mirroring .btn-continue (bottom-left). */
+.screen > .scq-back {
+  position: absolute;
+  bottom: 15px; right: 24px;
+  z-index: 12;
+}
+
+/* ── Hint popup (modal) ── */
+.scq-hint-overlay {
+  position: absolute; inset: 0; z-index: 60;
+  background: rgba(255, 255, 255, 0.78);
+  display: flex; align-items: center; justify-content: center;
+}
+.scq-hint-overlay.hidden { display: none !important; }
+.scq-hint-popup {
+  background: var(--subject-500); border-radius: 48px;
+  padding: 40px;
+  display: flex; flex-direction: column; align-items: center; gap: 24px;
+  width: 546px; max-width: 92%;
+}
+.scq-hint-content {
+  /* align-items: stretch (default) — NOT flex-end. With a single column
+     child (.scq-hint-text) and no explicit width, flex-end shrink-wraps
+     the child to its content width, then (direction: rtl) anchors that
+     shrunk box to the physical LEFT — so short hint text renders
+     right-aligned WITHIN a box that itself sits away from the popup's
+     right edge, reading as "right-aligned but starting from the middle."
+     Stretch keeps the child at the full 462px width so text-align: right
+     on the title/body always hugs the real right edge, regardless of
+     text length. */
+  display: flex; flex-direction: column; gap: 24px;
+  width: 462px; max-width: 100%; direction: rtl;
+}
+.scq-hint-text {
+  flex: 1; min-width: 0; direction: rtl;
+  display: flex; flex-direction: column; gap: 24px;
+  color: #fff;
+}
+.scq-hint-title {
+  width: 100%; text-align: right; position: relative;
+  padding-right: 56px;
+  font-family: 'Assistant', sans-serif; font-weight: 700; font-size: 32px;
+  color: #fff; line-height: normal;
+}
+.scq-hint-title::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 34.3px;
+  background: url("../assets/img/icon-idea-blue.svg") no-repeat center / contain;
+  filter: brightness(0) invert(1);
+}
+.scq-hint-body {
+  width: 100%; text-align: right;
+  font-family: 'Assistant', sans-serif; font-weight: 400; font-size: 24px;
+  color: #fff; line-height: normal;
+}
+.scq-hint-body p { line-height: normal; }
+.scq-hint-ico-lg {
+  display: none;
+}
+.scq-hint-close {
+  width: 196px; padding: 16px 40px;
+  border: none; border-radius: 1000px; background: #fff;
+  color: #303030;
+  font-family: 'Assistant', sans-serif; font-size: 24px; font-weight: 400;
+  cursor: pointer;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   TransitionScreen — finish screens S5 / S6 (.s7-* classes,
+   part-01 reference vocabulary)
+   ═══════════════════════════════════════════════════════ */
+.s7-content {
+  position: absolute;
+  inset: 0 0 74px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.s7-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.s7-title {
+  font-family: 'Assistant', sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: #303030;
+  margin: 0;
+}
+
+.s7-subtitle {
+  font-family: 'Assistant', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #303030;
+  margin: 0;
+}
+
+.s7-video-wrap {
+  width: 640px;
+  height: 360px;
+  flex-shrink: 0;
+}
+
+.s7-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   TransitionScreen — S0 intro (.s10-* classes, part-01
+   reference vocabulary)
+   ═══════════════════════════════════════════════════════ */
+.s10-content {
+  position: absolute;
+  inset: 0 0 74px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.s10-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  direction: rtl;
+}
+
+.s10-subtitle {
+  font-family: 'Assistant', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #303030;
+  margin: 0;
+}
+
+.s10-title {
+  font-family: 'Assistant', sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: #303030;
+  margin: 0;
+}
+
+.s10-body {
+  font-family: 'Assistant', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #303030;
+  margin: 0;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.s10-video-wrap {
+  width: 640px;
+  height: 360px;
+  flex-shrink: 0;
+}
+
+.s10-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   Question body text (.s9q-* — part-01 reference vocabulary)
+   ═══════════════════════════════════════════════════════ */
+.s9q-qbody {
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px; font-weight: 400;
+  color: #303030; text-align: right; direction: rtl;
+  margin: 0; line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Dropdown component (.mdq-* — part-01 reference vocabulary)
+   ═══════════════════════════════════════════════════════ */
+.mdq-dropdown-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.mdq-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  direction: ltr; /* chevron left, text right */
+  gap: 16px;
+  width: 180px;
+  height: 42px;
+  padding: 0 17px;
+  background: #fff;
+  border: 1px solid rgba(174, 174, 174, 0.5);
+  border-radius: 10px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.mdq-btn:disabled {
+  cursor: default;
+}
+
+.mdq-btn[aria-expanded="true"] {
+  border: 1.5px solid var(--subject-500);
+}
+
+.mdq-chevron {
+  flex-shrink: 0;
+  width: 16px;
+  height: 8px;
+  display: block;
+}
+
+.mdq-selected {
+  flex: 1;
+  min-width: 0;
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #303030;
+  text-align: right;
+  direction: rtl;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: normal;
+}
+
+.mdq-btn[data-empty="true"] .mdq-selected {
+  opacity: 0.5;
+}
+
+/* ── Dropdown list ── */
+.mdq-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 180px;
+  background: #fff;
+  border: 1px solid rgba(174, 174, 174, 0.5);
+  border-radius: 8px;
+  padding: 8px 8px 16px;
+  list-style: none;
+  margin: 0;
+  z-index: 30;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
+  direction: rtl;
+}
+
+.mdq-option {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #303030;
+  text-align: center;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mdq-option:hover {
+  background: var(--subject-300);
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   שאלת השיא — s1–s4 (no progress nav). CSS class names keep the
+   part-01/part-04 reference vocabulary (.s12-*, .s13q-only, peak-*);
+   only the #id scoping matches this part's screen numbering.
+   ═══════════════════════════════════════════════════════════ */
+
+/* S1 / S2 — image SCQ, no nav so start higher */
+#s1 .scq-question, #s2 .scq-question {
+  position: absolute; top: 100px; left: 40px; right: 40px; width: auto;
+  display: flex; flex-direction: row; gap: 16px; align-items: flex-start;
+  justify-content: flex-end; direction: ltr;
+}
+#s1 .scq-img, #s2 .scq-img { position: relative; left: auto; top: auto; flex-shrink: 0; }
+#s1 .s9q-right, #s2 .s9q-right {
+  width: 822px; flex-shrink: 0; display: flex; flex-direction: column;
+  gap: 20px; align-items: flex-start; direction: rtl;
+}
+#s1 .scq-qtext, #s2 .scq-qtext { position: relative; right: auto; top: auto; width: 100%; padding-top: 0; gap: 10px; }
+#s1 .scq-answers, #s2 .scq-answers, #s4 .scq-answers { position: relative; right: auto; top: auto; width: 682px; }
+/* S2 — long question text + 4 options; tighten vertical spacing so option 4
+   stays above the bottom bar without needing a scroll. */
+#s2 .s9q-right { gap: 14px; }
+#s2 .scq-qtext { gap: 6px; }
+#s2 .scq-answers { gap: 9px; }
+#s1 .scq-opt, #s2 .scq-opt, #s4 .scq-opt { width: 682px; }
+
+/* Peak question text — regular 20px paragraphs + bullet list */
+.peak-qtext .s9q-qbody { font-size: 20px; line-height: 1.35; }
+/* Peak intro sentence — recurring opening line, brand blue on every screen it appears */
+.s9q-qbody.peak-intro { color: var(--subject-500); }
+.peak-list {
+  margin: 0; padding-right: 26px; direction: rtl; text-align: right;
+  font-family: 'Assistant', sans-serif; font-size: 20px; color: #303030; line-height: 1.35;
+}
+.peak-list li { margin-bottom: 2px; }
+
+/* S4 — text-only SCQ (no image) */
+#s4 .scq-question {
+  position: absolute; top: 100px; left: 40px; right: 40px; width: auto;
+  display: flex; justify-content: flex-end; direction: ltr;   /* ltr container → flex-end pins the block to the RIGHT (Figma 2368-10179) */
+}
+#s4 .s13q-only {
+  width: 822px; display: flex; flex-direction: column; gap: 22px;
+  align-items: flex-start; direction: rtl;
+}
+#s4 .scq-qtext { position: relative; right: auto; top: auto; width: 100%; padding-top: 0; gap: 10px; }
+
+/* S3 — dropdown question, image variant */
+#s3 .s12-scroll-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 74px;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  direction: ltr;
+}
+#s3 .s12-scroll-area.s12-scrollable { overflow-y: auto; }
+#s3 .s12-scroll-area::-webkit-scrollbar { width: 8px; }
+#s3 .s12-scroll-area::-webkit-scrollbar-track { background: transparent; }
+#s3 .s12-scroll-area::-webkit-scrollbar-thumb {
+  background: #8f8f8f;
+  border-radius: 999px;
+}
+#s3 .s12-content {
+  width: 1240px;
+  min-height: min-content;
+  /* top 100px matches S1/S2 (.scq-question top) — no nav on these screens */
+  margin: 100px 40px 32px 0;
+  padding: 0 0 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: flex-start;
+  direction: rtl;
+}
+#s3 .s12-text {
+  position: relative;
+  right: auto;
+  top: auto;
+  width: 964px;
+  padding-top: 0;
+  gap: 10px;
+  align-items: flex-start;
+  text-align: right;
+}
+#s3 .s12-text .s9q-qbody { font-size: 20px; line-height: 1.35; text-align: right; width: 100%; }
+#s3 .s12-note {
+  font-family: 'Assistant', sans-serif;
+  font-size: 15px;
+  color: #303030;
+  text-align: right;
+  direction: rtl;
+  margin: 0;
+  width: 100%;
+  line-height: 1.3;
+}
+#s3 .peak-list {
+  width: 100%;
+  padding-right: 28px;
+  margin: 0;
+}
+#s3 .peak-list li { text-align: right; }
+#s3 .s12-cols {
+  display: flex;
+  gap: 60px;
+  justify-content: flex-start;
+  align-self: flex-start;
+  direction: rtl;
+}
+#s3 .s12-col { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+#s3 .s12-img-frame {
+  width: 259px; height: 259px; border: 3px solid rgba(201, 206, 216, 0.4);
+  border-radius: 16px; overflow: hidden; background: #fff; flex-shrink: 0;
+  position: relative;
+}
+#s3 .s12-img-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Scale readouts overlaid on each experiment photo — same tag style as
+   part 01 S1 (.scq-scale-label): white tag, Subject/500 bold Assistant.
+   Both photos are square (409² / 364²) inside a square cover frame, so
+   frame percentages track the photo directly. Unscoped (not under #s3)
+   so the tags also render inside the zoom-modal clone. */
+.s12-scale-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 65px; height: 35px;
+  padding: 0 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff;
+  color: var(--subject-500);
+  font-family: 'Assistant', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  box-sizing: border-box;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 2;
+}
+/* Centered on each scale's display window */
+.s12-scale-label--right { left: 51%; top: 79%; }  /* Exp.jpg — 675.2 */
+.s12-scale-label--left  { left: 47%; top: 81%; }  /* Exp35.jpg — 350.7 */
+#s3 .mdq-dropdown-wrap { position: relative; width: 259px; }
+/* Button auto-grows so a long selected answer wraps inside the frame instead of overflowing (Figma 2368-9849) */
+#s3 .mdq-btn { width: 259px; height: auto; min-height: 42px; padding: 7px 17px; align-items: center; }
+#s3 .mdq-selected { white-space: normal; text-overflow: clip; text-align: center; line-height: 1.15; }
+#s3 .mdq-btn.s12-ok  { border-color: #609e12 !important; }
+#s3 .mdq-btn.s12-bad { border-color: #b20010 !important; }
+/* Open DOWNWARD, attached to the button: the list tucks 15px behind the button
+   (Figma 1647-17046), with extra top padding so the first option clears it.
+   Overlays the content/bar below (high z-index) and scrolls only if the
+   options ever get too tall to fit. */
+#s3 .mdq-list {
+  width: 259px;
+  display: flex; flex-direction: column; gap: 4px;
+  top: calc(100% - 15px); bottom: auto;
+  z-index: 50;
+  padding: 24px 8px 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.10);
+  max-height: none; overflow-y: visible;
+  direction: ltr;
+}
+/* The open button paints over the tucked-under top edge of its list */
+#s3 .mdq-btn[aria-expanded="true"] { position: relative; z-index: 51; }
+/* Option sentences wrap to multiple lines, centered, instead of overflowing the list */
+#s3 .mdq-option { white-space: normal; line-height: 1.15; direction: rtl; }
+/* Divider sits in the margin BETWEEN option boxes (8px each side incl. the
+   4px list gap), so the hover highlight never touches it. */
+#s3 .mdq-option + .mdq-option {
+  position: relative;
+  margin-top: 13px; /* + 4px list gap = 8px + 1px line + 8px */
+}
+#s3 .mdq-option + .mdq-option::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: #d9d9d9;
+  border-radius: 999px;
+}
+#s3 .scq-bar {
+  z-index: 40;
+}
+
+/* ═══════════════════ BLOCK F — report modal ═══════════════════ */
+.report-modal-overlay { position: absolute; inset: 0; z-index: 200; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; direction: rtl; }
+.report-modal-overlay[hidden] { display: none; }
+.report-modal-box { width: 520px; background: #ffffff; border-radius: 16px; padding: 36px 36px 28px; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 18px; direction: rtl; }
+.report-confirm-box { width: 420px; padding: 40px 36px 32px; gap: 20px; }
+.report-close-btn { position: absolute; top: 14px; left: 14px; width: 32px; height: 32px; border: none; background: none; font-size: 17px; color: #8A9AAA; cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center; outline: none; transition: background 0.12s, color 0.12s; }
+.report-close-btn:hover { background: #F0F2F5; color: #303030; }
+.report-close-btn:focus-visible { outline: 2px solid #8900E1; }
+.report-modal-title { font-size: 26px; font-weight: 700; color: #1A2744; line-height: 1.2; }
+.report-modal-body { font-size: 18px; color: #5A6A7A; line-height: 1.5; margin-top: -6px; }
+.report-field { display: flex; flex-direction: column; gap: 6px; }
+.report-label { font-size: 16px; font-weight: 600; color: #303030; }
+.required-star { color: #D32F2F; }
+.report-select { height: 44px; border: 2px solid #C9CED8; border-radius: 10px; padding: 0 14px; font-family: 'Assistant', sans-serif; font-size: 17px; color: #303030; background: #ffffff; direction: rtl; outline: none; cursor: pointer; transition: border-color 0.12s; }
+.report-select:focus { border-color: #8900E1; }
+.report-textarea { border: 2px solid #C9CED8; border-radius: 10px; padding: 12px 14px; font-family: 'Assistant', sans-serif; font-size: 16px; color: #303030; direction: rtl; resize: none; outline: none; transition: border-color 0.12s; line-height: 1.5; }
+.report-textarea:focus { border-color: #8900E1; }
+.report-char-count { font-size: 13px; color: #8A9AAA; text-align: left; direction: ltr; }
+.report-actions { display: flex; flex-direction: row; gap: 12px; direction: rtl; margin-top: 4px; }
+.report-error { color: #d33; font-size: 14px; margin: 4px 0 8px; direction: rtl; }
+.report-thanks { text-align: center; padding: 8px 0; direction: rtl; }
+.report-submit-btn { height: 44px; padding: 0 32px; background: linear-gradient(180deg, #8900E1 9%, #6500A5 100%); color: #ffffff; border: none; border-radius: 50px; font-family: 'Assistant', sans-serif; font-size: 18px; font-weight: 600; cursor: pointer; outline: none; transition: opacity 0.12s; }
+.report-submit-btn:hover { opacity: 0.88; }
+.report-submit-btn:focus-visible { outline: 3px solid #8900E1; outline-offset: 3px; }
+.report-cancel-btn { height: 44px; padding: 0 28px; background: #ffffff; color: #5A6A7A; border: 2px solid #C9CED8; border-radius: 50px; font-family: 'Assistant', sans-serif; font-size: 18px; font-weight: 400; cursor: pointer; outline: none; transition: border-color 0.12s, color 0.12s; }
+.report-cancel-btn:hover { border-color: #8A9AAA; color: #303030; }
+.report-cancel-btn:focus-visible { outline: 3px solid #8900E1; outline-offset: 3px; }

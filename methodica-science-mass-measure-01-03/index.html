@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>לומדה — מדידת מסה · חלק 03</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       GLOBAL — Report / Issue button (shared across every screen).
+       ═══════════════════════════════════════════════════════════ -->
+  <button class="flag-btn" id="flag-btn" type="button" aria-label="מצאתם בעיה?">
+    <span class="flag-btn-icon"></span>
+    <span class="flag-btn-label">מצאתם בעיה?</span>
+  </button>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S0 — Screen 01 · TransitionScreen  (clone of part-01 s10)
+       Subtitle / title / body + auto-playing companion video.
+       Character carried over from earlier parts via localStorage.
+       First screen of this part: NO back button.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen active" data-screen="0" id="s0">
+
+    <div class="s10-content">
+      <div class="s10-text">
+        <p class="s10-subtitle">השלמת בהצלחה את התרגול – כל הכבוד!</p>
+        <h1 class="s10-title">זמן טוב ללמוד גם בצורה אחרת,</h1>
+        <p class="s10-body">כי למידה מתרחשת בכל מיני צורות.</p>
+      </div>
+      <div class="s10-video-wrap">
+        <video id="s0-video" class="s10-video" autoplay muted playsinline></video>
+      </div>
+      <div class="s10-bubble s10-bubble--mirrored" aria-hidden="true">
+        <span class="s10-bubble-text">את המשימה הבאה נבצע בלי מחשב במרחב הכיתה או בית הספר!</span>
+      </div>
+    </div>
+
+    <button class="btn-continue" id="s0-continue" onclick="advanceFromS0()">המשך</button>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S1 — Screen 02 · TextScreen  (new template)
+       Figma: eSbp4bKHgBky0rakDb8l9N node 982:14661 (variant "none image").
+       Centered 40px title + right-aligned 24px body (numbered task list).
+       Bottom bar: [continue → part 04] (left) · [back] (right).
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="1" id="s1">
+
+    <div class="ts-question">
+      <h1 class="ts-title">משימת כיתה</h1>
+
+      <div class="ts-content-row">
+        <div class="ts-content">
+          <p class="ts-item">1. מצאו <strong>חפץ מוצק קטן</strong> בסביבתכם (מחק, מטבע, צרור מפתחות, כלי כלשהו).</p>
+          <p class="ts-item">2. מצאו שני חברים או חברות הנמצאים באותו שלב בלמידה.</p>
+          <p class="ts-item">3. בקשו מהם למדוד את המסה של החפץ באותם המאזניים שיש לכם בכיתה.</p> 
+          <p class="ts-item"> כל אחת ואחד ימדדו בנפרד, מבלי לגלות מה התוצאה שהתקבלה.</p>
+          <p class="ts-item"> לא מצאתם חבר או חברה? לא נורא! מדדו בעצמכם 3 פעמים.</p>
+          <p class="ts-item">4. שתפו ורשמו את 3 התוצאות שקיבלתם וחיזרו אל המערכת לענות על השאלות שממתינות לכם.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom action bar: [continue] (left) · [back] (right) -->
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s1-continue" type="button"
+                onclick="goToNextPart()">חזרתי. אפשר להמשיך</button>
+      </div>
+      <button class="scq-back" id="s1-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+
+  </section>
+
+    <!-- ═══════════════════════════════════════ REPORT MODAL ═══════════════════════════════════════ -->
+    <div id="report-modal" class="report-modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="report-modal-title">
+      <div class="report-modal-box">
+        <button class="report-close-btn" onclick="tryCloseReportModal()" aria-label="סגור">&#10005;</button>
+        <h2 class="report-modal-title" id="report-modal-title">דיווח על בעיה</h2>
+        <p class="report-modal-body">משהו לא ברור או לא עובד כמו שצריך? ספרו לנו מה קרה כדי שנטפל.</p>
+        <div class="report-field">
+          <label class="report-label" for="report-type">מה סוג הבעיה <span class="required-star">*</span></label>
+          <select class="report-select" id="report-type">
+            <option value="" disabled selected>בחרו סוג בעיה</option>
+            <option value="technical">תקלה טכנית או שמשהו לא עובד</option>
+            <option value="unclear">משהו לא ברור לי</option>
+            <option value="other">אחר</option>
+          </select>
+        </div>
+        <div class="report-field">
+          <label class="report-label" for="report-text">מה קרה? <span class="required-star">*</span></label>
+          <textarea class="report-textarea" id="report-text" maxlength="250" rows="4" placeholder="תארו את הבעיה..."></textarea>
+          <span class="report-char-count" id="report-char-count">0 / 250</span>
+        </div>
+        <p class="report-error" id="report-error" hidden>נא לבחור סוג בעיה ולתאר מה קרה.</p>
+        <div class="report-actions">
+          <button class="report-submit-btn" onclick="submitReport()">שליחה</button>
+          <button class="report-cancel-btn" onclick="tryCloseReportModal()">ביטול</button>
+        </div>
+        <div class="report-thanks" id="report-thanks" hidden>
+          <p>תודה! הדיווח נשלח. נטפל בהקדם.</p>
+          <button class="report-submit-btn" onclick="forceCloseReportModal()">סגירה</button>
+        </div>
+      </div>
+    </div>
+    <div id="report-confirm-modal" class="report-modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+      <div class="report-modal-box report-confirm-box">
+        <h2 class="report-modal-title" id="confirm-modal-title">בטוח לסגור את החלון?</h2>
+        <p class="report-modal-body">בלחיצה על סגירה לא יישלח דיווח</p>
+        <div class="report-actions">
+          <button class="report-cancel-btn" onclick="forceCloseReportModal()">סגור חלון</button>
+          <button class="report-submit-btn" onclick="backToReportForm()">אני רוצה לדווח</button>
+        </div>
+      </div>
+    </div>
+
+</div><!-- /#app -->
+
+<script src="js/main.js"></script>
+</body>
+</html>

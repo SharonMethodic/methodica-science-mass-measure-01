@@ -1,0 +1,81 @@
+{
+  "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-05",
+  "title": "שאלת השיא — מדידת מסת גז",
+  "learningUnitId": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01",
+  "componentPurpose": "assessment",
+  "isAssessment": true,
+  "manufacture": "methodica",
+  "isRequired": true,
+  "order": 5,
+  "languages": [
+    "Hebrew"
+  ],
+  "skills": [],
+  "estimatedTimeInMinutes": 10,
+  "subContent": [
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-05-001",
+      "title": "שאלת השיא — מדידת מסת גז (ארבעה סעיפים)",
+      "informationToBot": "שאלת שיא בת ארבעה סעיפים על מדידת מסת גז שמשתחרר ממשקה תוסס: (א) התיאור המדעי המתאים; (ב) חישוב מסת הגז שהשתחרר (2.4 גרם); (ג) התאמת שיטת מדידה למטרת מחקר (תפריטים); (ד) הדרך הנכונה לטפל בתוצאה חריגה בקבוצה. יש להצליח בשלושה סעיפים לפחות מתוך ארבעה.",
+      "contentType": "Assessment",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "choice",
+          "questionText": "סעיף א: האם יפתח צודק? מהו התיאור המדעי המתאים לתופעה הזו?",
+          "answers": [
+            "יפתח צודק. אם המסה לא השתנתה, לא היה גז במשקה",
+            "יפתח טועה. הגז עבר למיכל אחר, אך נשאר בתוך המערכת שנשקלה",
+            "יפתח טועה. בכל ניסוי עם גז המסה חייבת להשתנות. כאן כנראה הייתה תקלה",
+            "מהנתונים בלבד אי אפשר לדעת האם היה גז במשקה"
+          ],
+          "correctAnswers": [
+            "יפתח טועה. הגז עבר למיכל אחר, אך נשאר בתוך המערכת שנשקלה"
+          ]
+        },
+        {
+          "questionId": "q2",
+          "questionType": "choice",
+          "questionText": "סעיף ב: מהי מסת הגז שהשתחרר?",
+          "answers": [
+            "1081.2 גרם",
+            "2.0 גרם",
+            "539.4 גרם",
+            "2.4 גרם"
+          ],
+          "correctAnswers": [
+            "2.4 גרם"
+          ]
+        },
+        {
+          "questionId": "q3",
+          "questionType": "fill-in",
+          "questionText": "סעיף ג: בחרו עבור כל שיטת מדידה את מטרת המחקר המתאימה ביותר.",
+          "answers": [
+            "השוואת מסת המערכת לפני ואחרי הניסוי",
+            "חישוב מסת הגז שהשתחרר"
+          ],
+          "correctAnswers": [
+            "שיטה 1 ← השוואת מסת המערכת לפני ואחרי הניסוי",
+            "שיטה 2 ← חישוב מסת הגז שהשתחרר"
+          ]
+        },
+        {
+          "questionId": "q4",
+          "questionType": "choice",
+          "questionText": "סעיף ד: מהי הדרך הנכונה להשתמש בתוצאות אלו?",
+          "answers": [
+            "לחשב ממוצע של כל התוצאות",
+            "לבחור בתוצאה הגבוהה ביותר כי היא מראה שינוי ברור יותר",
+            "לבדוק האם הייתה טעות מדידה או דליפה בקבוצה ג",
+            "להתעלם מהמדידה של קבוצה ג׳ ולחשב ממוצע של שתי התוצאות הדומות."
+          ],
+          "correctAnswers": [
+            "לבדוק האם הייתה טעות מדידה או דליפה בקבוצה ג"
+          ]
+        }
+      ]
+    }
+  ]
+}

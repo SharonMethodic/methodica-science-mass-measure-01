@@ -1,0 +1,266 @@
+{
+  "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-01",
+  "title": "הקנייה + תרגול חימום וסטנדרטי — מדידת מסה",
+  "learningUnitId": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01",
+  "componentPurpose": "both",
+  "isAssessment": false,
+  "manufacture": "methodica",
+  "isRequired": true,
+  "order": 1,
+  "languages": [
+    "Hebrew"
+  ],
+  "skills": [],
+  "estimatedTimeInMinutes": 24,
+  "subContent": [
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-01-001",
+      "title": "פתיחה — מסת הבלונים",
+      "informationToBot": "פתיח מוטיבציוני: שני בלונים מאותו חומר, אחד מנופח כבד יותר. הלומד מנחש מדוע. מטרה: לעורר סקרנות לגבי מסה ואוויר.",
+      "contentType": "Motivational",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "choice",
+          "questionText": "שני הבלונים עשויים מאותו החומר. נחשו, למה האחד כבד יותר מהשני?",
+          "answers": [
+            "הגומי של הבלון המנופח נמתח ונהיה כבד יותר",
+            "האוויר שבתוך הבלון המנופח מעלה את המסה שלו",
+            "המאזניים לא תקינים — שניהם אמורים לשקול אותו דבר",
+            "הבלון המנופח כבד יותר כי הוא לוחץ חזק יותר על הכף"
+          ],
+          "correctAnswers": [
+            "האוויר שבתוך הבלון המנופח מעלה את המסה שלו"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-01-002",
+      "title": "סוגי מאזניים למדידות מדעיות",
+      "informationToBot": "הקנייה: חשיבות המדידה המדויקת (קלפים) ומיון סוגי מאזניים — מאזני כפות ומאזניים דיגיטליים (גרירה). טעות נפוצה: שיוך שגוי של סוג המאזניים.",
+      "contentType": "Instruction",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "drag-and-drop",
+          "questionText": "באילו סוגי מאזניים נשתמש למדידות מדעיות? גררו את התמונה המתאימה לכל סוג מאזניים.",
+          "answers": [
+            "מאזניים דיגיטליים",
+            "מאזני כפות",
+            "מסיח (אדם)"
+          ],
+          "correctAnswers": [
+            "מאזניים דיגיטליים ← דיגיטלי",
+            "מאזני כפות ← כפות"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-01-003",
+      "title": "רגע לפני הסרטון — חשיבות היחידה",
+      "informationToBot": "שאלת ביניים אחרי סרטון ראשון: מדוע חשוב לרשום יחידה לצד המספר. טעות נפוצה: חשיבה שהיחידה נחוצה רק לחישוב ממוצע.",
+      "contentType": "Practice",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "choice",
+          "questionText": "מדוע ד\"ר אושרית אמרה שחשוב תמיד לכתוב את היחידה לצד המספר?",
+          "answers": [
+            "כי כך קל יותר לזהות חריגות במדידה",
+            "כי בלי יחידה אי אפשר לחשב ממוצע של מדידות חוזרות",
+            "כי מספר ללא יחידה הוא חסר משמעות מבחינה מדעית",
+            "לפי היחידה נדע אם צריך לאפס את המאזניים לפני המדידה הבאה"
+          ],
+          "correctAnswers": [
+            "כי מספר ללא יחידה הוא חסר משמעות מבחינה מדעית"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-01-004",
+      "title": "יחידות מידה של מסה",
+      "informationToBot": "השלמת משפט (שלושה תפריטים נפתחים) על יחידות המסה: גרם, קילוגרם, מיליגרם. טעות נפוצה: בלבול בין היחידות לפי סדר גודל.",
+      "contentType": "Practice",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "fill-in",
+          "questionText": "השלימו: היחידות המקובלות למדידת מסה במעבדה הן __ (g) או __ (kg). כאשר נמדוד כמויות קטנות ומדויקות נשתמש לרוב ביחידת ה-__ (אלפית הגרם).",
+          "answers": [
+            "גרם",
+            "קילוגרם",
+            "מיליגרם"
+          ],
+          "correctAnswers": [
+            "גרם",
+            "קילוגרם",
+            "מיליגרם"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-01-005",
+      "title": "מה מציגים המאזניים (איפוס)",
+      "informationToBot": "קריאת מאזניים דיגיטליים לאחר איפוס עם כוס ריקה ומזיגת נוזל. מטרה: הבנת פעולת האיפוס (טרה). טעות נפוצה: חשיבה שהצג מציג את המסה המשולבת.",
+      "contentType": "Practice",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "choice",
+          "questionText": "דר' דסלין הניח כוס ריקה על המאזניים הדיגיטליים, לחץ על כפתור האיפוס כך שהצג הראה 0.00, ומזג את הנוזל אל הכוס. מה מציגים המאזניים כעת?",
+          "answers": [
+            "את המסה המשולבת של הכוס והנוזל",
+            "רק את המסה של הנוזל",
+            "רק את המסה של הכוס הריקה"
+          ],
+          "correctAnswers": [
+            "רק את המסה של הנוזל"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-01-006",
+      "title": "סטנדרטי 1: סדר מדידת מסה של גוף מוצק",
+      "informationToBot": "תרגול סטנדרטי מדורג (שאלה 1): סידור שלבי מדידת מסה בסדר הנכון בגרירה. סדר נכון: בדיקה ואיפוס, הנחת הגוף, קריאה ורישום, הסרה וחזרות.",
+      "contentType": "Practice",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "drag-and-drop",
+          "questionText": "סדרו את שלבי מדידת המסה של גוף מוצק במעבדה לפי הסדר הנכון.",
+          "answers": [
+            "בדיקה שהמאזניים נקיים ומאופסים על הנתון 0.00.",
+            "הנחת הגוף המוצק במרכז כפת המאזניים.",
+            "קריאת התוצאה ורישום שלה.",
+            "הסרת הגוף, וידוא איפוס, וביצוע חזרות נוספות."
+          ],
+          "correctAnswers": [
+            "בדיקה שהמאזניים נקיים ומאופסים על הנתון 0.00.",
+            "הנחת הגוף המוצק במרכז כפת המאזניים.",
+            "קריאת התוצאה ורישום שלה.",
+            "הסרת הגוף, וידוא איפוס, וביצוע חזרות נוספות."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-01-007",
+      "title": "סטנדרטי 2: יושרה מדעית",
+      "informationToBot": "תרגול סטנדרטי (שאלה 2): זיהוי העמדה המדעית והערכית הנכונה מול הבדל קטן בין מדידות (51, 52, 56 גרם).",
+      "contentType": "Practice",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "choice",
+          "questionText": "אדם ויעל מדדו 3 פעמים רכיב מוצק וקיבלו 51, 52, 56 גרם. מי מציג עמדה מדעית (וערכית) נכונה?",
+          "answers": [
+            "יעל צודקת – גם כאשר ההבדל אינו קיצוני מאוד, חשוב לבדוק האם הוא עלול להשפיע על איכות הנתונים.",
+            "אדם צודק – תמיד צריך לחשב ממוצע של כל המדידות.",
+            "יעל ואדם טועים. כשיש הבדל בין מדידות נשקול להחליף את מכשיר המדידה ולמדוד שוב."
+          ],
+          "correctAnswers": [
+            "יעל צודקת – גם כאשר ההבדל אינו קיצוני מאוד, חשוב לבדוק האם הוא עלול להשפיע על איכות הנתונים."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-01-008",
+      "title": "סטנדרטי 3: דיוק ומהימנות",
+      "informationToBot": "תרגול סטנדרטי (שאלה 3): הכרת המושגים מהימנות ודיוק (יישומון שקילה, קלפים) ושיוך תיאורי דיוק/מהימנות ל-4 מטרות קליעה בגרירה.",
+      "contentType": "Practice",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "drag-and-drop",
+          "questionText": "לפניכם 4 מטרות קליעה. גררו לכל מטרה את התיאור המתאים ביותר (מדויק/מהימן).",
+          "answers": [
+            "לא מדויק ולא מהימן",
+            "גם מדויק וגם מהימן",
+            "מהימן אך לא מדויק",
+            "מדויק אך לא מהימן"
+          ],
+          "correctAnswers": [
+            "מטרה 1 ← מדויק אך לא מהימן",
+            "מטרה 2 ← לא מדויק ולא מהימן",
+            "מטרה 3 ← מהימן אך לא מדויק",
+            "מטרה 4 ← גם מדויק וגם מהימן"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-01-009",
+      "title": "סטנדרטי 4: חזרה ליישומון השקילה",
+      "informationToBot": "תרגול סטנדרטי (שאלה 4): סיווג סדרת מדידות (13, 10, 12 גר') לפי מהימנות ודיוק.",
+      "contentType": "Practice",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "choice",
+          "questionText": "לפניכם המדידות שהתקבלו במהלך השקילה (13, 10, 12 גר'). מהו התיאור המתאים ביותר למדידות האלו?",
+          "answers": [
+            "מהימנות אך לא מדויקות",
+            "מדויקות אך לא מהימנות",
+            "גם מדויקות וגם מהימנות",
+            "לא מדויקות ולא מהימנות"
+          ],
+          "correctAnswers": [
+            "מהימנות אך לא מדויקות"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-01-010",
+      "title": "סטנדרטי 5: ממוצע מדידות",
+      "informationToBot": "תרגול סטנדרטי (שאלה 5, שני סעיפים): חישוב ממוצע כיתתי של חמש מדידות (49.8, 50.1, 50.0, 49.9, 50.2) והסקת מסקנה על מהימנות ודיוק מקרבת התוצאות.",
+      "contentType": "Practice",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "choice",
+          "questionText": "סעיף א: מהו הממוצע הכיתתי של המדידות (49.8, 50.1, 50.0, 49.9, 50.2 גרם)?",
+          "answers": [
+            "49.8 גרם",
+            "50.0 גרם",
+            "50.2 גרם",
+            "55 גרם"
+          ],
+          "correctAnswers": [
+            "50.0 גרם"
+          ]
+        },
+        {
+          "questionId": "q2",
+          "questionType": "choice",
+          "questionText": "סעיף ב: מה ניתן להסיק מכך שהתוצאות של כל הקבוצות היו קרובות מאוד זו לזו?",
+          "answers": [
+            "לפחות קבוצה אחת מדדה בצורה שגויה",
+            "המסה של המים השתנתה בין הקבוצות",
+            "המדידות היו מהימנות ומדויקות",
+            "המדידות היו מהימנות אך לא מדויקות"
+          ],
+          "correctAnswers": [
+            "המדידות היו מהימנות ומדויקות"
+          ]
+        }
+      ]
+    }
+  ]
+}

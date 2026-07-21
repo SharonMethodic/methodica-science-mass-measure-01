@@ -1,0 +1,106 @@
+{
+  "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-02",
+  "title": "תרגול חלופי (רמדיאציה) — מדידת מסה",
+  "learningUnitId": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01",
+  "componentPurpose": "practice",
+  "isAssessment": false,
+  "manufacture": "methodica",
+  "isRequired": false,
+  "order": 2,
+  "languages": [
+    "Hebrew"
+  ],
+  "skills": [],
+  "estimatedTimeInMinutes": 10,
+  "subContent": [
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-02-001",
+      "title": "פתיח — נמשיך לתרגל (וידאו)",
+      "informationToBot": "מסך מעבר עם סרטון דמות מלווה: עידוד להמשך תרגול עם שלוש שאלות פשוטות יותר. אין הערכה.",
+      "contentType": "Motivational",
+      "mediaFormat": "Video",
+      "questions": []
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-02-002",
+      "title": "שאלה 1 — זיהוי תוצאה חריגה בסדרת מדידות",
+      "informationToBot": "שני סעיפים על סדרת מדידות של עדן, פלג ושחר: זיהוי התוצאה החריגה (סעיף א) והחלטה אם נדרשת מדידה נוספת (סעיף ב).",
+      "contentType": "Practice",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "choice",
+          "questionText": "סעיף א: האם ישנה תוצאה חריגה בעיניכם? מהי?",
+          "answers": [
+            "כן, התוצאה של שחר",
+            "כן, התוצאה של עדן",
+            "כן, התוצאה של פלג",
+            "לא. כל התוצאות סבירות"
+          ],
+          "correctAnswers": [
+            "כן, התוצאה של עדן"
+          ]
+        },
+        {
+          "questionId": "q2",
+          "questionType": "choice",
+          "questionText": "סעיף ב: האם על שחר, עדן ופלג לבצע מדידה נוספת?",
+          "answers": [
+            "כן, בגלל שאחת המדידות חריגה",
+            "לא, נהוג לבצע רק שלוש מדידות",
+            "כן, נהוג לבצע שלוש אבל עדיף יותר",
+            "אין כלל. שיחליטו מה שירצו"
+          ],
+          "correctAnswers": [
+            "כן, בגלל שאחת המדידות חריגה"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-02-003",
+      "title": "שאלה 2 — מהימנות ודיוק (גרירה)",
+      "informationToBot": "גרירת תיאורי דיוק/מהימנות אל 4 סדרות מדידה של ד\"ר בוחבוט (ערך אמיתי 50.00 גרם).",
+      "contentType": "Practice",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "drag-and-drop",
+          "questionText": "ד\"ר בוחבוט מדדה את מסת אותו חומר 4 פעמים (הערך האמיתי 50.00 גרם). גררו כל תיאור אל המדידה המתאימה.",
+          "answers": [
+            "מדויק אך לא מהימן",
+            "מהימן אך לא מדויק",
+            "גם מדויק וגם מהימן",
+            "לא מדויק ולא מהימן"
+          ],
+          "correctAnswers": [
+            "מדידה 1 ← גם מדויק וגם מהימן",
+            "מדידה 2 ← מהימן אך לא מדויק",
+            "מדידה 3 ← מדויק אך לא מהימן",
+            "מדידה 4 ← לא מדויק ולא מהימן"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://lomdot.education.gov.il/metodica/720active/science/mass-measure/01/methodica-science-mass-measure-01-02-004",
+      "title": "שאלה 3 — שחזור מדידה מהממוצע",
+      "informationToBot": "שחזור תוצאת מדידה שלישית שנמחקה, בהינתן שתי מדידות (50, 52) וממוצע 50. פתרון: (50+52+x)/3=50 ⇒ x=48.",
+      "contentType": "Practice",
+      "mediaFormat": "Interactive Content",
+      "questions": [
+        {
+          "questionId": "q1",
+          "questionType": "numeric",
+          "questionText": "דן מדד מסה 3 פעמים (50, 52, ו-?) וקיבל ממוצע 50 גר'. המדידה השלישית נמחקה — סייעו לדן לשחזרה: (50 + 52 + __) ÷ 3 = 50",
+          "answers": [],
+          "correctAnswers": [
+            48
+          ]
+        }
+      ]
+    }
+  ]
+}

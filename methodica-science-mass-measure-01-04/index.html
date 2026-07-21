@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>לומדה — מדידת מסה · חלק 04</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- GLOBAL — Report / Issue button -->
+  <button class="flag-btn" id="flag-btn" type="button" aria-label="מצאתם בעיה?">
+    <span class="flag-btn-icon"></span>
+    <span class="flag-btn-label">מצאתם בעיה?</span>
+  </button>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S0 — Screen 01 · TransitionScreen  (ref part-01 s7)
+       Title + subtitle + auto-playing companion video. First screen.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen active" data-screen="0" id="s0">
+    <div class="s7-content">
+      <div class="s7-text">
+        <h1 class="s7-title">זמן ל־3 שאלות מתקדמות<br>ועוד הפתעות מעניינות...</h1>
+        <p class="s7-subtitle">(זה אומר שעלינו רמה)</p>
+      </div>
+      <div class="s7-video-wrap">
+        <video id="s0-video" class="s7-video" autoplay muted playsinline></video>
+      </div>
+    </div>
+    <button class="btn-continue" id="s0-continue" onclick="advanceFromS0()">המשך</button>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S1 — Screen 02 · MeasurementWidget (practice, not scored)
+       Weigh empty cup (→40), press faucet to fill, weigh again (→115).
+       Adapted from part-01 s13. Progress nav A · dot 1 current.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="1" id="s1">
+
+    <!-- Progress Question nav A — 3 dots, dot 1 current -->
+    <nav class="progress-question" data-nav="A" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon progress-question__icon--current"></div>
+        <span class="progress-question__label progress-question__label--visited">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 3</span>
+      </div>
+    </nav>
+
+    <div class="s13-content">
+
+      <!-- RIGHT column: text + the two measurement input rows -->
+      <div class="s13-question-col">
+        <div class="s13-text-block">
+          <p class="s13-title">חישוב מסה עקיפה — תרגול לקראת שאלה 1</p>
+          <p class="s13-body">נחזור אל מעבדת השקילה והפעם נשקול בה נוזל.</p>
+        </div>
+        <div class="s13-inputs-slot">
+          <div class="s13-row s1-row">
+            <span class="s13-word s1-word">א. גררו את הכוס הכימית אל המאזניים הדיגיטליים ותעדו את משקלה:</span>
+            <input id="s1-input-1" class="s13-input" type="number" inputmode="decimal"
+                   step="any" disabled dir="rtl" aria-label="משקל הכוס הריקה"
+                   oninput="s1InputChange(1)">
+            <span class="s13-word">גר'</span>
+          </div>
+          <div class="s13-row s1-row">
+            <span class="s13-word s1-word">ב. כעת, לחצו על הברז ומלאו את הכוס בנוזל. שקלו שוב:</span>
+            <input id="s1-input-2" class="s13-input" type="number" inputmode="decimal"
+                   step="any" disabled dir="rtl" aria-label="משקל הכוס עם הנוזל"
+                   oninput="s1InputChange(2)">
+            <span class="s13-word">גר'</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEFT column: scale + draggable cup + faucet -->
+      <div class="s13-scale-col" id="s1-scale-col">
+        <div class="s13-drag-area"
+             ondragover="s1ScaleDragOver(event)"
+             ondrop="s1ScaleDrop(event)">
+          <div class="s13-scale-bg-container">
+            <img class="s13-scale-bg-img" src="assets/img/s13-scale.png" alt="מאזניים">
+          </div>
+          <div id="s1-display" class="s13-display">00.00</div>
+          <!-- Reset button is always disabled in this widget (decorative). -->
+          <button class="s13-reset-btn" type="button" disabled tabindex="-1" aria-hidden="true">
+            <img src="assets/img/s13-reset-btn.png" alt="" class="s13-reset-btn-bg"><span>איפוס</span>
+          </button>
+        </div>
+
+        <!-- Tray: cup + faucet side by side (cup right, faucet to its right) -->
+        <div class="s13-tray s1-tray" id="s1-tray">
+          <div class="s13-weight s1-cup" id="s1-cup"
+               draggable="true" ondragstart="s1CupDragStart(event)">
+            <div class="s13-weight-inner s1-cup-inner">
+              <img id="s1-cup-img" src="assets/img/Cup.png" alt="כוס כימית">
+            </div>
+          </div>
+          <button class="s1-faucet" id="s1-faucet" type="button" disabled
+                  onclick="s1Faucet()" aria-label="ברז">
+            <img src="assets/img/Faucet.png" alt="ברז">
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom action bar -->
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s1-continue" type="button" disabled
+                onclick="advanceScreen()">אפשר להמשיך</button>
+      </div>
+      <button class="scq-back" id="s1-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S2 — Screen 03 · SingleChoiceQuestion (scored Q1, dot 1)
+       Disabled scale widget (left) + measurements recap + radio (right).
+       Adapted from part-01 s17. Correct = option c (75 גרם). 2 attempts.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="2" id="s2">
+
+    <nav class="progress-question" data-nav="A" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon progress-question__icon--current"></div>
+        <span class="progress-question__label progress-question__label--visited">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 3</span>
+      </div>
+    </nav>
+
+    <div class="s17-content">
+      <!-- RIGHT column: recap text + measurements + question -->
+      <div class="s17q-right">
+        <div class="s17q-block">
+          <div class="s17q-textblock">
+            <p class="s17q-title">חישוב מסה עקיפה</p>
+            <p class="s17q-subtitle">לפניכם המדידות שהתקבלו במהלך השקילה:</p>
+          </div>
+          <div class="s17q-measures">
+            <div class="s17q-measure">
+              <span class="s17q-mlabel">מדידה 1</span>
+              <span class="s17q-mbox">40</span>
+              <span class="s17q-munit">גר'</span>
+            </div>
+            <div class="s17q-measure">
+              <span class="s17q-mlabel">מדידה 2</span>
+              <span class="s17q-mbox">115</span>
+              <span class="s17q-munit">גר'</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="s17q-qblock">
+          <p class="s17q-question">מהי המסה האמיתית של הנוזל לבדו?</p>
+          <div class="scq-answers" id="s2q-answers" role="radiogroup"
+               aria-label="מהי המסה האמיתית של הנוזל לבדו?">
+            <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                    data-id="a" onclick="scqSelect('s2',this)">
+              <span class="scq-opt-text">40 גרם</span><span class="scq-radio" aria-hidden="true"></span>
+            </button>
+            <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                    data-id="b" onclick="scqSelect('s2',this)">
+              <span class="scq-opt-text">115 גרם</span><span class="scq-radio" aria-hidden="true"></span>
+            </button>
+            <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                    data-id="c" onclick="scqSelect('s2',this)">
+              <span class="scq-opt-text">75 גרם</span><span class="scq-radio" aria-hidden="true"></span>
+            </button>
+            <button class="scq-opt" type="button" role="radio" aria-checked="false"
+                    data-id="d" onclick="scqSelect('s2',this)">
+              <span class="scq-opt-text">155 גרם</span><span class="scq-radio" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEFT column: disabled (inert) scale widget — full cup + faucet, all disabled -->
+      <div class="s13-scale-col s17-scale-col">
+        <div class="s13-drag-area">
+          <div class="s13-scale-bg-container">
+            <img class="s13-scale-bg-img" src="assets/img/s13-scale.png" alt="מאזניים">
+          </div>
+          <div class="s13-display">00.00</div>
+          <button class="s13-reset-btn" type="button" disabled tabindex="-1" aria-hidden="true">
+            <img src="assets/img/s13-reset-btn.png" alt="" class="s13-reset-btn-bg"><span>איפוס</span>
+          </button>
+        </div>
+        <div class="s13-tray s1-tray s2-tray">
+          <div class="s13-weight s1-cup s2-inert">
+            <div class="s13-weight-inner s1-cup-inner"><img src="assets/img/CupFull.png" alt="כוס עם נוזל"></div>
+          </div>
+          <span class="s1-faucet s2-inert" aria-hidden="true"><img src="assets/img/Faucet.png" alt=""></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s2q-check" type="button" disabled
+                onclick="scqCheck('s2')">צדקתי?</button>
+        <button class="scq-hint" id="s2q-hint" type="button"
+                style="visibility:hidden" onclick="scqOpenHint('s2')">
+          <span>אפשר רמז?</span>
+          <img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt="">
+        </button>
+      </div>
+      <button class="scq-back" id="s2-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S3 — Screen 04 · MeasurementWidget (practice, dot 2)
+       Weigh EMPTY balloon 3× into a table, then compute the average.
+       3.1 / 3.3 / 3.2 → avg 3.2. Average: 1 attempt, then reveal.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="3" id="s3">
+
+    <nav class="progress-question" data-nav="A" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon progress-question__icon--current"></div>
+        <span class="progress-question__label progress-question__label--visited">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 3</span>
+      </div>
+    </nav>
+
+    <div class="s13-content">
+      <div class="s13-question-col">
+        <div class="s13-text-block">
+          <p class="s13-title">מסה של אוויר — תרגול לקראת שאלה 2</p>
+          <p class="s13-body">נחזור אל המאזניים והפעם נשקול בלון ריק.<br>
+            א. שקלו את הבלון 3 פעמים כדי שהמדידה תהיה מהימנה.<br>
+            לאחר כל מדידה, לחצו על כפתור "איפוס".</p>
+        </div>
+
+        <!-- Measurements table: 3 rows the learner fills after each weighing -->
+        <table class="mw-table" dir="rtl">
+          <thead><tr><th>מס' מדידה</th><th>תוצאה (גר')</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><input id="s3-input-1" class="s13-input mw-cell" type="number" inputmode="decimal" step="any" disabled dir="rtl" aria-label="מדידה 1" oninput="mwInputChange('s3',1)"></td></tr>
+            <tr><td>2</td><td><input id="s3-input-2" class="s13-input mw-cell" type="number" inputmode="decimal" step="any" disabled dir="rtl" aria-label="מדידה 2" oninput="mwInputChange('s3',2)"></td></tr>
+            <tr><td>3</td><td><input id="s3-input-3" class="s13-input mw-cell" type="number" inputmode="decimal" step="any" disabled dir="rtl" aria-label="מדידה 3" oninput="mwInputChange('s3',3)"></td></tr>
+          </tbody>
+        </table>
+
+        <div class="s13-row mw-avg-row">
+          <span class="s13-word">ב. כעת חשבו את ממוצע המדידות:</span>
+          <input id="s3-avg" class="s13-input" type="number" inputmode="decimal" step="any"
+                 disabled dir="rtl" aria-label="ממוצע המדידות" oninput="mwAvgChange('s3')">
+          <span class="s13-word">גר'</span>
+        </div>
+      </div>
+
+      <div class="s13-scale-col" id="s3-scale-col">
+        <div class="s13-drag-area"
+             ondragover="mwScaleDragOver(event,'s3')" ondrop="mwScaleDrop(event,'s3')">
+          <div class="s13-scale-bg-container">
+            <img class="s13-scale-bg-img" src="assets/img/s13-scale.png" alt="מאזניים">
+          </div>
+          <div id="s3-display" class="s13-display">00.00</div>
+          <button id="s3-reset-btn" class="s13-reset-btn" type="button" disabled onclick="mwReset('s3')">
+            <img src="assets/img/s13-reset-btn.png" alt="" class="s13-reset-btn-bg">
+            <span>איפוס</span>
+          </button>
+        </div>
+        <div class="s13-tray" id="s3-tray">
+          <div class="s13-weight mw-balloon" id="s3-balloon"
+               draggable="true" ondragstart="mwBalloonDragStart(event,'s3')">
+            <div class="s13-weight-inner mw-balloon-inner">
+              <img src="assets/img/BallonSmall.png" alt="בלון ריק">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s3-continue" type="button" disabled
+                onclick="mwBarBtn('s3')">צדקתי?</button>
+      </div>
+      <button class="scq-back" id="s3-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S4 — Screen 05 · MeasurementWidget (practice, dot 2)
+       Weigh INFLATED balloon 3× → 3.0 / 4.2 / 3.6 → avg 3.6.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="4" id="s4">
+
+    <nav class="progress-question" data-nav="A" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon progress-question__icon--current"></div>
+        <span class="progress-question__label progress-question__label--visited">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon"></div>
+        <span class="progress-question__label">שאלה 3</span>
+      </div>
+    </nav>
+
+    <div class="s13-content">
+      <div class="s13-question-col">
+        <div class="s13-text-block">
+          <p class="s13-title">מסה של אוויר — תרגול לקראת שאלה 2</p>
+          <p class="s13-body">ג. ניפחנו עבורכם את הבלון.<br>
+            שקלו גם את הבלון המנופח (3 פעמים כדי שהמדידה תהיה מהימנה).<br>
+            לאחר כל מדידה, לחצו על כפתור "איפוס".</p>
+        </div>
+
+        <table class="mw-table" dir="rtl">
+          <thead><tr><th>מס' מדידה</th><th>תוצאה (גר')</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><input id="s4-input-1" class="s13-input mw-cell" type="number" inputmode="decimal" step="any" disabled dir="rtl" aria-label="מדידה 1" oninput="mwInputChange('s4',1)"></td></tr>
+            <tr><td>2</td><td><input id="s4-input-2" class="s13-input mw-cell" type="number" inputmode="decimal" step="any" disabled dir="rtl" aria-label="מדידה 2" oninput="mwInputChange('s4',2)"></td></tr>
+            <tr><td>3</td><td><input id="s4-input-3" class="s13-input mw-cell" type="number" inputmode="decimal" step="any" disabled dir="rtl" aria-label="מדידה 3" oninput="mwInputChange('s4',3)"></td></tr>
+          </tbody>
+        </table>
+
+        <div class="s13-row mw-avg-row">
+          <span class="s13-word">ד. חשבו את ממוצע המדידות:</span>
+          <input id="s4-avg" class="s13-input" type="number" inputmode="decimal" step="any"
+                 disabled dir="rtl" aria-label="ממוצע המדידות" oninput="mwAvgChange('s4')">
+          <span class="s13-word">גר'</span>
+        </div>
+      </div>
+
+      <div class="s13-scale-col" id="s4-scale-col">
+        <div class="s13-drag-area"
+             ondragover="mwScaleDragOver(event,'s4')" ondrop="mwScaleDrop(event,'s4')">
+          <div class="s13-scale-bg-container">
+            <img class="s13-scale-bg-img" src="assets/img/s13-scale.png" alt="מאזניים">
+          </div>
+          <div id="s4-display" class="s13-display">00.00</div>
+          <button id="s4-reset-btn" class="s13-reset-btn" type="button" disabled onclick="mwReset('s4')">
+            <img src="assets/img/s13-reset-btn.png" alt="" class="s13-reset-btn-bg">
+            <span>איפוס</span>
+          </button>
+        </div>
+        <div class="s13-tray" id="s4-tray">
+          <div class="s13-weight mw-balloon" id="s4-balloon"
+               draggable="true" ondragstart="mwBalloonDragStart(event,'s4')">
+            <div class="s13-weight-inner mw-balloon-inner">
+              <img src="assets/img/BallonBig.png" alt="בלון מנופח">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s4-continue" type="button" disabled
+                onclick="mwBarBtn('s4')">צדקתי?</button>
+      </div>
+      <button class="scq-back" id="s4-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S5 — Screen 06 · SingleChoiceQuestion image variant (scored Q2, dot 2)
+       Ballons.png (empty left = 3.2, inflated right = 3.6) + radio.
+       Correct = option c. 2 attempts. Reference part-01 s9.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="5" id="s5">
+    <nav class="progress-question" data-nav="A" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon"></div><span class="progress-question__label">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon progress-question__icon--current"></div>
+        <span class="progress-question__label progress-question__label--visited">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon"></div><span class="progress-question__label">שאלה 3</span>
+      </div>
+    </nav>
+
+    <div class="scq-question">
+      <div class="scq-img">
+        <div class="scq-img-inner s5-img-inner">
+          <button class="img-zoom-btn" type="button" aria-label="הגדלת התמונה"
+                  data-zoom-src="assets/img/Ballons.png" data-zoom-alt="בלון ריק ובלון מנופח">
+            <svg class="img-zoom-btn__icon" aria-hidden="true" width="20" height="20" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1C11.8661 1 15 4.13371 15 7.99902C15 11.8643 11.8661 14.998 8 14.998C4.1339 14.998 1.00002 11.8643 1 7.99902C1 4.13371 4.13389 1 8 1Z" stroke="currentColor" stroke-width="2"/><path d="M12.6221 14.188L14.2657 12.6141L19.928 18.5274C20.3626 18.9813 20.347 19.7016 19.8931 20.1362C19.4392 20.5708 18.7189 20.5552 18.2843 20.1013L12.6221 14.188Z" fill="currentColor"/></svg>
+          </button>
+          <img src="assets/img/Ballons.png" alt="בלון ריק ובלון מנופח">
+          <span class="s5-balloon-label s5-label-empty">ממוצע מדידות: 3.2</span>
+          <span class="s5-balloon-label s5-label-full">ממוצע מדידות: 3.6</span>
+        </div>
+      </div>
+      <div class="s9q-right">
+        <div class="scq-qtext">
+          <p class="s9q-qtitle">מסה של אוויר</p>
+          <p class="s9q-qbody">איזו מסקנה נתמכת בצורה הטובה ביותר על ידי הנתונים?</p>
+        </div>
+        <div class="scq-answers" id="s5q-answers" role="radiogroup" aria-label="איזו מסקנה נתמכת בצורה הטובה ביותר על ידי הנתונים?">
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="a" onclick="scqSelect('s5',this)">
+            <span class="scq-opt-text">הבלון המנופח גדול יותר, הוא דוחף את האוויר שבינו ובין המאזניים. יש משפיע על המדידות.</span><span class="scq-radio" aria-hidden="true"></span>
+          </button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="b" onclick="scqSelect('s5',this)">
+            <span class="scq-opt-text">לחץ האוויר בתוך הבלון מותח את הגומי ומגדיל את המסה שלו</span><span class="scq-radio" aria-hidden="true"></span>
+          </button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="c" onclick="scqSelect('s5',this)">
+            <span class="scq-opt-text">הנתונים מחזקים את הטענה שלאוויר יש מסה</span><span class="scq-radio" aria-hidden="true"></span>
+          </button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="d" onclick="scqSelect('s5',this)">
+            <span class="scq-opt-text">ההפרש קטן מדי. צריך לבצע עוד מדידות כדי להסיק מסקנה סופית</span><span class="scq-radio" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s5q-check" type="button" disabled onclick="scqCheck('s5')">צדקתי?</button>
+        <button class="scq-hint" id="s5q-hint" type="button" style="visibility:hidden" onclick="scqOpenHint('s5')">
+          <span>אפשר רמז?</span><img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt="">
+        </button>
+      </div>
+      <button class="scq-back" id="s5-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S6 — Screen 07 · SingleChoiceQuestion image variant (Q3a, dot 3)
+       Tamar.jpg + 2 options (כן/לא). Correct = b (לא). 1 attempt, no hint.
+       Dot 3 stays 'current' — scored only after Q3b (s7).
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="6" id="s6">
+    <nav class="progress-question" data-nav="A" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon"></div><span class="progress-question__label">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon"></div><span class="progress-question__label">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon progress-question__icon--current"></div>
+        <span class="progress-question__label progress-question__label--visited">שאלה 3</span>
+      </div>
+    </nav>
+
+    <div class="scq-question">
+      <div class="scq-img">
+        <div class="scq-img-inner"><button class="img-zoom-btn" type="button" aria-label="הגדלת התמונה" data-zoom-src="assets/img/Tamar.jpg" data-zoom-alt="תמר במעבדה"><svg class="img-zoom-btn__icon" aria-hidden="true" width="20" height="20" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1C11.8661 1 15 4.13371 15 7.99902C15 11.8643 11.8661 14.998 8 14.998C4.1339 14.998 1.00002 11.8643 1 7.99902C1 4.13371 4.13389 1 8 1Z" stroke="currentColor" stroke-width="2"/><path d="M12.6221 14.188L14.2657 12.6141L19.928 18.5274C20.3626 18.9813 20.347 19.7016 19.8931 20.1362C19.4392 20.5708 18.7189 20.5552 18.2843 20.1013L12.6221 14.188Z" fill="currentColor"/></svg></button><img src="assets/img/Tamar.jpg" alt="תמר במעבדה"></div>
+      </div>
+      <div class="s9q-right">
+        <div class="scq-qtext">
+          <p class="s9q-qtitle">איך נכון למדוד?</p>
+          <p class="s9q-qbody">תמר לומדת הנדסת כימיה, ועובדת כעוזרת מחקר במעבדה באוניברסיטה. הדוקטור עימו היא עובדת ביקש ממנה להוסיף 32 גרם מים לאבקת תרופה ניסיונית. היא מדדה פעם אחת וקיבלה בדיוק 32.0 גרם. היא חייכה בסיפוק ואמרה: "יש לי את זה!"<br><strong>א. האם תמר סיימה את המדידה?</strong></p>
+        </div>
+        <div class="scq-answers" id="s6q-answers" role="radiogroup" aria-label="האם תמר סיימה את המדידה?">
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="a" onclick="scqSelect('s6',this)">
+            <span class="scq-opt-text">כן</span><span class="scq-radio" aria-hidden="true"></span>
+          </button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="b" onclick="scqSelect('s6',this)">
+            <span class="scq-opt-text">לא</span><span class="scq-radio" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s6q-check" type="button" disabled onclick="scqCheck('s6')">צדקתי?</button>
+      </div>
+      <button class="scq-back" id="s6-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S7 — Screen 08 · DragAndDropQuestion sequencing (Q3b, dot 3)
+       7 draggable steps → 5 numbered targets (2 are distractors).
+       2 attempts. On submit, dot 3 is scored (Q3a + Q3b combined).
+       Reference part-01 s11.
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="7" id="s7">
+    <nav class="progress-question" data-nav="A" aria-label="ניווט שאלות">
+      <div class="progress-question__item" data-question="1">
+        <div class="progress-question__icon"></div><span class="progress-question__label">שאלה 1</span>
+      </div>
+      <div class="progress-question__connector" data-connector="1"></div>
+      <div class="progress-question__item" data-question="2">
+        <div class="progress-question__icon"></div><span class="progress-question__label">שאלה 2</span>
+      </div>
+      <div class="progress-question__connector" data-connector="2"></div>
+      <div class="progress-question__item" data-question="3">
+        <div class="progress-question__icon progress-question__icon--current"></div>
+        <span class="progress-question__label progress-question__label--visited">שאלה 3</span>
+      </div>
+    </nav>
+
+    <div class="s11-question-area s7-question-area">
+      <h1 class="s11-title">איך נכון למדוד?</h1>
+      <p class="s11-subtitle">ב. עזרו לתמר לבנות את פרוטוקול המדידה הנכון.<br>גררו וסדרו לפי הסדר <strong>רק את השלבים המתאימים</strong>.</p>
+
+      <div class="s11ddq-main-row">
+        <!-- Numbered drop targets (left, 5) -->
+        <div class="s11ddq-targets-col">
+          <div class="s11ddq-target-row">
+            <div class="s11ddq-target" id="target-s7-1"
+                 ondragover="s7ddqDragOver(event,'target-s7-1')" ondragleave="s7ddqDragLeave(event,'target-s7-1')" ondrop="s7ddqDrop(event,'target-s7-1')"></div>
+            <div class="s11ddq-num-badge">1</div>
+          </div>
+          <div class="s11ddq-target-row">
+            <div class="s11ddq-target" id="target-s7-2"
+                 ondragover="s7ddqDragOver(event,'target-s7-2')" ondragleave="s7ddqDragLeave(event,'target-s7-2')" ondrop="s7ddqDrop(event,'target-s7-2')"></div>
+            <div class="s11ddq-num-badge">2</div>
+          </div>
+          <div class="s11ddq-target-row">
+            <div class="s11ddq-target" id="target-s7-3"
+                 ondragover="s7ddqDragOver(event,'target-s7-3')" ondragleave="s7ddqDragLeave(event,'target-s7-3')" ondrop="s7ddqDrop(event,'target-s7-3')"></div>
+            <div class="s11ddq-num-badge">3</div>
+          </div>
+          <div class="s11ddq-target-row">
+            <div class="s11ddq-target" id="target-s7-4"
+                 ondragover="s7ddqDragOver(event,'target-s7-4')" ondragleave="s7ddqDragLeave(event,'target-s7-4')" ondrop="s7ddqDrop(event,'target-s7-4')"></div>
+            <div class="s11ddq-num-badge">4</div>
+          </div>
+          <div class="s11ddq-target-row">
+            <div class="s11ddq-target" id="target-s7-5"
+                 ondragover="s7ddqDragOver(event,'target-s7-5')" ondragleave="s7ddqDragLeave(event,'target-s7-5')" ondrop="s7ddqDrop(event,'target-s7-5')"></div>
+            <div class="s11ddq-num-badge">5</div>
+          </div>
+        </div>
+
+        <!-- Source tray (right, 7 steps) -->
+        <div class="s11ddq-source" id="s7ddq-source">
+          <div class="s11ddq-source-slot"><div class="s11ddq-drag-card" id="drag-s7-1" draggable="true" ondragstart="s7ddqDragStart(event,'drag-s7-1')" ondragend="s7ddqDragEnd(event)"><span class="s11ddq-card-text">למזוג מים לכוס המדידה עד שהמאזניים מראים 32 גרם</span></div></div>
+          <div class="s11ddq-source-slot"><div class="s11ddq-drag-card" id="drag-s7-2" draggable="true" ondragstart="s7ddqDragStart(event,'drag-s7-2')" ondragend="s7ddqDragEnd(event)"><span class="s11ddq-card-text">לכבות את המאזניים לפני המדידה</span></div></div>
+          <div class="s11ddq-source-slot"><div class="s11ddq-drag-card" id="drag-s7-3" draggable="true" ondragstart="s7ddqDragStart(event,'drag-s7-3')" ondragend="s7ddqDragEnd(event)"><span class="s11ddq-card-text">לבדוק שהמאזניים מאופסים (מראים 0.00)</span></div></div>
+          <div class="s11ddq-source-slot"><div class="s11ddq-drag-card" id="drag-s7-4" draggable="true" ondragstart="s7ddqDragStart(event,'drag-s7-4')" ondragend="s7ddqDragEnd(event)"><span class="s11ddq-card-text">להניח את כוס המדידה על המאזניים</span></div></div>
+          <div class="s11ddq-source-slot"><div class="s11ddq-drag-card" id="drag-s7-5" draggable="true" ondragstart="s7ddqDragStart(event,'drag-s7-5')" ondragend="s7ddqDragEnd(event)"><span class="s11ddq-card-text">ללחוץ על כפתור האיפוס</span></div></div>
+          <div class="s11ddq-source-slot"><div class="s11ddq-drag-card" id="drag-s7-6" draggable="true" ondragstart="s7ddqDragStart(event,'drag-s7-6')" ondragend="s7ddqDragEnd(event)"><span class="s11ddq-card-text">לקרוא את נפח המים בלבד, ללא קשר לערך על צג המאזניים</span></div></div>
+          <div class="s11ddq-source-slot"><div class="s11ddq-drag-card" id="drag-s7-7" draggable="true" ondragstart="s7ddqDragStart(event,'drag-s7-7')" ondragend="s7ddqDragEnd(event)"><span class="s11ddq-card-text">לחזור על המדידה 3 פעמים לפחות, ולהשוות בין התוצאות</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s7ddq-check" type="button" disabled onclick="s7ddqCheck()">צדקתי?</button>
+        <button class="scq-hint" id="s7ddq-hint" type="button" style="visibility:hidden" onclick="s7ddqOpenHint()">
+          <span>אפשר רמז?</span><img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt="">
+        </button>
+      </div>
+      <button class="scq-back" id="s7-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S8 — Screen 09 · VideoWatchAndContinue (ref part-01 s5, no toggle)
+       Continue unlocks after the video is played. No progress nav.
+       LAST screen of part 04 — continue moves on to part 05 (שאלת השיא).
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen" data-screen="8" id="s8">
+    <div class="vpv-content">
+      <div class="vpv-text">
+        <div class="vpv-header">
+          <p class="vpv-subtitle">רגע לפני שנמשיך,</p>
+          <h1 class="vpv-title">מה הקשר בין מדידה מדויקת וצדק?</h1>
+        </div>
+      </div>
+      <!-- YouTube embed — https://www.youtube.com/watch?v=8AVv7XEeXF8
+           Same IFrame-API pattern as part 01 (nocookie host, captions on,
+           Continue unlocks on the player's ENDED state). -->
+      <div class="vpv-video-wrap" id="s8-video-wrap">
+        <div id="s8-youtube-player"></div>
+      </div>
+    </div>
+    <button class="btn-continue" id="s8-continue" disabled onclick="goToNextPart()">להמשיך</button>
+    <button class="scq-back" id="s8-back" type="button" onclick="goBack()">חזרה</button>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       Shared feedback popups + hint overlays (outside .screen)
+       ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S2 SCQ popup + hint -->
+  <div class="scq-popup hidden" id="s2q-popup" onmousedown="popupMouseDown(event,'s2q-popup')" role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button" onclick="scqClosePopup('s2')" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="s2q-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="s2q-popup-body"></div>
+  </div>
+  <div class="scq-hint-overlay hidden" id="s2q-hint-overlay" onclick="scqCloseHintOnBackdrop(event,'s2')">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true" aria-labelledby="s2q-hint-title">
+      <div class="scq-hint-content">
+        <div class="scq-hint-text">
+          <h2 class="scq-hint-title" id="s2q-hint-title">חישבו:</h2>
+          <div class="scq-hint-body">
+            <p>במדידה השנייה המאזניים שוקלים גם את הכוס וגם את הנוזל. איך אפשר למצוא רק את מסת הנוזל?</p>
+          </div>
+        </div>
+        <img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt="">
+      </div>
+      <button class="scq-hint-close" type="button" onclick="scqCloseHint('s2')">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <!-- S3 / S4 average-reveal popups -->
+  <div class="scq-popup hidden" id="s3-popup" onmousedown="popupMouseDown(event,'s3-popup')" role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button" onclick="hide('s3-popup')" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="s3-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="s3-popup-body"></div>
+  </div>
+  <div class="scq-popup hidden" id="s4-popup" onmousedown="popupMouseDown(event,'s4-popup')" role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button" onclick="hide('s4-popup')" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="s4-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="s4-popup-body"></div>
+  </div>
+
+  <!-- S5 SCQ popup + hint -->
+  <div class="scq-popup hidden" id="s5q-popup" onmousedown="popupMouseDown(event,'s5q-popup')" role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button" onclick="scqClosePopup('s5')" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="s5q-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="s5q-popup-body"></div>
+  </div>
+  <div class="scq-hint-overlay hidden" id="s5q-hint-overlay" onclick="scqCloseHintOnBackdrop(event,'s5')">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true" aria-labelledby="s5q-hint-title">
+      <div class="scq-hint-content">
+        <div class="scq-hint-text">
+          <h2 class="scq-hint-title" id="s5q-hint-title">רמז</h2>
+          <div class="scq-hint-body">
+            <p>השוו את מסת הבלון לפני ואחרי הניפוח - מה השתנה בין שני המצבים? מה נכנס אל הבלון כאשר ניפחתם אותו?</p>
+          </div>
+        </div>
+        <img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt="">
+      </div>
+      <button class="scq-hint-close" type="button" onclick="scqCloseHint('s5')">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <!-- S6 SCQ popup (no hint) -->
+  <div class="scq-popup hidden" id="s6q-popup" onmousedown="popupMouseDown(event,'s6q-popup')" role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button" onclick="scqClosePopup('s6')" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="s6q-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="s6q-popup-body"></div>
+  </div>
+
+  <!-- S7 DnD popup + hint -->
+  <div class="scq-popup hidden" id="s7ddq-popup" onmousedown="popupMouseDown(event,'s7ddq-popup')" role="status" aria-live="polite">
+    <div class="scq-popup-header">
+      <button class="scq-popup-close" type="button" onclick="hide('s7ddq-popup')" aria-label="סגור">✕</button>
+      <p class="scq-popup-title" id="s7ddq-popup-title"></p>
+    </div>
+    <div class="scq-popup-body" id="s7ddq-popup-body"></div>
+  </div>
+  <div class="scq-hint-overlay hidden" id="s7ddq-hint-overlay" onclick="s7ddqCloseHintOnBackdrop(event)">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true" aria-labelledby="s7ddq-hint-title">
+      <div class="scq-hint-content">
+        <div class="scq-hint-text">
+          <h2 class="scq-hint-title" id="s7ddq-hint-title">חישבו:</h2>
+          <div class="scq-hint-body">
+            <p>אם הייתם מלמדים חבר או חברה את פרוטוקול המדידה, על אילו שלבים לא הייתם מדלגים?</p>
+          </div>
+        </div>
+        <img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt="">
+      </div>
+      <button class="scq-hint-close" type="button" onclick="s7ddqCloseHint()">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <!-- Shared image zoom modal -->
+  <div class="img-zoom-modal hidden" id="img-zoom-modal" aria-hidden="true">
+    <div class="img-zoom-modal__backdrop" data-zoom-close="true"></div>
+    <div class="img-zoom-modal__panel" role="dialog" aria-modal="true" aria-label="תצוגת תמונה מוגדלת">
+      <button class="img-zoom-modal__close" type="button" aria-label="סגירת התמונה" data-zoom-close="true"><svg class="img-zoom-modal__close-icon" aria-hidden="true" width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.192 1.192L13.808 13.808M13.808 1.192L1.192 13.808" stroke="currentColor" stroke-width="2.383" stroke-linecap="round"/></svg></button>
+      <div class="img-zoom-modal__stage" id="img-zoom-modal-stage"></div>
+    </div>
+  </div>
+
+    <!-- ═══════════════════════════════════════ REPORT MODAL ═══════════════════════════════════════ -->
+    <div id="report-modal" class="report-modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="report-modal-title">
+      <div class="report-modal-box">
+        <button class="report-close-btn" onclick="tryCloseReportModal()" aria-label="סגור">&#10005;</button>
+        <h2 class="report-modal-title" id="report-modal-title">דיווח על בעיה</h2>
+        <p class="report-modal-body">משהו לא ברור או לא עובד כמו שצריך? ספרו לנו מה קרה כדי שנטפל.</p>
+        <div class="report-field">
+          <label class="report-label" for="report-type">מה סוג הבעיה <span class="required-star">*</span></label>
+          <select class="report-select" id="report-type">
+            <option value="" disabled selected>בחרו סוג בעיה</option>
+            <option value="technical">תקלה טכנית או שמשהו לא עובד</option>
+            <option value="unclear">משהו לא ברור לי</option>
+            <option value="other">אחר</option>
+          </select>
+        </div>
+        <div class="report-field">
+          <label class="report-label" for="report-text">מה קרה? <span class="required-star">*</span></label>
+          <textarea class="report-textarea" id="report-text" maxlength="250" rows="4" placeholder="תארו את הבעיה..."></textarea>
+          <span class="report-char-count" id="report-char-count">0 / 250</span>
+        </div>
+        <p class="report-error" id="report-error" hidden>נא לבחור סוג בעיה ולתאר מה קרה.</p>
+        <div class="report-actions">
+          <button class="report-submit-btn" onclick="submitReport()">שליחה</button>
+          <button class="report-cancel-btn" onclick="tryCloseReportModal()">ביטול</button>
+        </div>
+        <div class="report-thanks" id="report-thanks" hidden>
+          <p>תודה! הדיווח נשלח. נטפל בהקדם.</p>
+          <button class="report-submit-btn" onclick="forceCloseReportModal()">סגירה</button>
+        </div>
+      </div>
+    </div>
+    <div id="report-confirm-modal" class="report-modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+      <div class="report-modal-box report-confirm-box">
+        <h2 class="report-modal-title" id="confirm-modal-title">בטוח לסגור את החלון?</h2>
+        <p class="report-modal-body">בלחיצה על סגירה לא יישלח דיווח</p>
+        <div class="report-actions">
+          <button class="report-cancel-btn" onclick="forceCloseReportModal()">סגור חלון</button>
+          <button class="report-submit-btn" onclick="backToReportForm()">אני רוצה לדווח</button>
+        </div>
+      </div>
+    </div>
+
+</div><!-- /#app -->
+
+<script src="js/main.js"></script>
+</body>
+</html>

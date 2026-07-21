@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>לומדה — מדידת מסה · חלק 05</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- GLOBAL — Report / Issue button -->
+  <button class="flag-btn" id="flag-btn" type="button" aria-label="מצאתם בעיה?">
+    <span class="flag-btn-icon"></span>
+    <span class="flag-btn-label">מצאתם בעיה?</span>
+  </button>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       S0 — Screen 01 · TransitionScreen (ref part-01 s10)
+       Intro to שאלת השיא. Companion video. First screen of part 05
+       (was s9 in part 04).
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="screen active" data-screen="0" id="s0">
+    <div class="s10-content">
+      <div class="s10-text">
+        <p class="s10-subtitle">כל הכבוד! הסתיים שלב התרגול.<br>אם לא הצלחת לענות נכון על חלק מהשאלות, חשוב להבין מה עדיין לא ברור ולפנות לצ'אט או למורה להסבר נוסף.</p>
+        <h1 class="s10-title">עכשיו מגיעה שאלת השיא</h1>
+        <p class="s10-body">יש בה ארבעה סעיפים. עליכם להצליח בשלושה לפחות.</p>
+      </div>
+      <div class="s10-video-wrap">
+        <video id="s0-video" class="s10-video" autoplay muted playsinline></video>
+      </div>
+    </div>
+    <button class="btn-continue" id="s0-continue" onclick="advanceScreen()">המשך</button>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       שאלת השיא — s1–s4 (4 scored sub-questions, NO progress nav).
+       Score (correct within attempts) branches to s6 (≥3) or s5.
+       ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S1 — Screen 02 · SCQ image variant (Q1a, was s10). Exp.jpg. Correct = b. -->
+  <section class="screen" data-screen="1" id="s1">
+    <div class="scq-question">
+      <div class="scq-img"><div class="scq-img-inner"><button class="img-zoom-btn" type="button" aria-label="הגדלת התמונה" data-zoom-src="assets/img/Exp.jpg" data-zoom-alt="מערכת הניסוי"><svg class="img-zoom-btn__icon" aria-hidden="true" width="20" height="20" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1C11.8661 1 15 4.13371 15 7.99902C15 11.8643 11.8661 14.998 8 14.998C4.1339 14.998 1.00002 11.8643 1 7.99902C1 4.13371 4.13389 1 8 1Z" stroke="currentColor" stroke-width="2"/><path d="M12.6221 14.188L14.2657 12.6141L19.928 18.5274C20.3626 18.9813 20.347 19.7016 19.8931 20.1362C19.4392 20.5708 18.7189 20.5552 18.2843 20.1013L12.6221 14.188Z" fill="currentColor"/></svg></button><img src="assets/img/Exp.jpg" alt="מערכת הניסוי — המאזניים מציגים 675.2 גרם"><span class="s12-scale-label s12-scale-label--right" aria-hidden="true">675.2g</span></div></div>
+      <div class="s9q-right">
+        <div class="scq-qtext peak-qtext">
+          <p class="s9q-qbody peak-intro"><strong>תלמידים ותלמידות בשיעור מדעים רצו לבדוק את מסת הגז שנמצא בבקבוק משקה תוסס.</strong></p>
+          <p class="s9q-qbody">הם בנו מערכת ניסוי:</p>
+          <ul class="peak-list">
+            <li>בקבוק המשקה חובר בצינורית למיכל איסוף ריק.</li>
+            <li>כאשר יפתחו את הבקבוק, הגז יעבור דרך הצינורית ויאסף במיכל.</li>
+          </ul>
+          <p class="s9q-qbody"><strong>סעיף א:</strong> בניסוי הראשון כל המערכת הייתה על המאזניים. אלה תוצאות השקילה:<br>לפני פתיחת בקבוק המשקה: 682.4 גרם<br>אחרי מעבר הגז למיכל האיסוף: 682.4 גרם<br>יפתח אמר: "כנראה שכמעט לא היה גז במשקה, כי המסה לא השתנתה".</p>
+          <p class="s9q-qbody"><strong>האם יפתח צודק? מהו התיאור המדעי המתאים לתופעה הזו?</strong></p>
+        </div>
+        <div class="scq-answers" id="s1q-answers" role="radiogroup" aria-label="האם יפתח צודק?">
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="a" onclick="scqSelect('s1',this)"><span class="scq-opt-text">יפתח צודק. אם המסה לא השתנתה, לא היה גז במשקה</span><span class="scq-radio" aria-hidden="true"></span></button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="b" onclick="scqSelect('s1',this)"><span class="scq-opt-text">יפתח טועה. הגז עבר למיכל אחר, אך נשאר בתוך המערכת שנשקלה</span><span class="scq-radio" aria-hidden="true"></span></button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="c" onclick="scqSelect('s1',this)"><span class="scq-opt-text">יפתח טועה. בכל ניסוי עם גז המסה חייבת להשתנות. כאן כנראה הייתה תקלה</span><span class="scq-radio" aria-hidden="true"></span></button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="d" onclick="scqSelect('s1',this)"><span class="scq-opt-text">מהנתונים בלבד אי אפשר לדעת האם היה גז במשקה</span><span class="scq-radio" aria-hidden="true"></span></button>
+        </div>
+      </div>
+    </div>
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s1q-check" type="button" disabled onclick="scqCheck('s1')">צדקתי?</button>
+        <button class="scq-hint" id="s1q-hint" type="button" style="visibility:hidden" onclick="scqOpenHint('s1')"><span>אפשר רמז?</span><img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt=""></button>
+      </div>
+      <button class="scq-back" id="s1-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+  </section>
+
+  <!-- S2 — Screen 03 · SCQ image variant (Q1b, סעיף ב, was s11). Exp35.jpg. Correct = d (2.4 גרם).
+       Tooltip on "המדידה" (Figma 2365-4652 / 2365-4716). -->
+  <section class="screen" data-screen="2" id="s2">
+    <div class="scq-question">
+      <div class="scq-img"><div class="scq-img-inner"><button class="img-zoom-btn" type="button" aria-label="הגדלת התמונה" data-zoom-src="assets/img/Exp35.jpg" data-zoom-alt="מערכת הניסוי"><svg class="img-zoom-btn__icon" aria-hidden="true" width="20" height="20" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1C11.8661 1 15 4.13371 15 7.99902C15 11.8643 11.8661 14.998 8 14.998C4.1339 14.998 1.00002 11.8643 1 7.99902C1 4.13371 4.13389 1 8 1Z" stroke="currentColor" stroke-width="2"/><path d="M12.6221 14.188L14.2657 12.6141L19.928 18.5274C20.3626 18.9813 20.347 19.7016 19.8931 20.1362C19.4392 20.5708 18.7189 20.5552 18.2843 20.1013L12.6221 14.188Z" fill="currentColor"/></svg></button><img src="assets/img/Exp35.jpg" alt="מערכת הניסוי — המאזניים מציגים 350.7 גרם"><span class="s12-scale-label s12-scale-label--left" aria-hidden="true">350.7g</span></div></div>
+      <div class="s9q-right">
+        <div class="scq-qtext peak-qtext">
+          <p class="s9q-qbody peak-intro"><strong>תלמידים ותלמידות בשיעור מדעים רצו לבדוק את מסת הגז שנמצא בבקבוק משקה תוסס.</strong></p>
+          <p class="s9q-qbody">הם בנו מערכת ניסוי:</p>
+          <ul class="peak-list">
+            <li>בקבוק המשקה חובר בצינורית למיכל איסוף ריק.</li>
+            <li>כאשר יפתחו את הבקבוק, הגז יעבור דרך הצינורית ויאסף במיכל.</li>
+          </ul>
+          <p class="s9q-qbody"><strong>סעיף ב:</strong> בניסוי השני השתמשו בשיטה אחרת - שקילת הבקבוק המלא לפני ואחרי שחרור הגז, כאשר מיכל האיסוף אינו על המאזניים.</p>
+          <p class="s9q-qbody">אלה תוצאות <span class="tooltip-word">המדידה<span class="scq-info" tabindex="0" role="button" aria-label="המאזניים מציגים את משקל המערכת, וממנו ניתן לקבוע את מסתה."><svg class="scq-info-i" aria-hidden="true" width="15" height="15" viewBox="0 0 15 15" fill="none"><rect width="15" height="15" rx="7.5" fill="#019DE5"/><path d="M7.12194 12.3271C6.88994 12.3271 6.69394 12.2931 6.53394 12.2251C6.37794 12.1571 6.26394 12.0631 6.19194 11.9431C6.11994 11.8191 6.09394 11.6731 6.11394 11.5051C6.13394 11.3251 6.16194 11.1051 6.19794 10.8451C6.23794 10.5851 6.27994 10.2931 6.32394 9.9691C6.37194 9.6451 6.42394 9.2951 6.47994 8.9191C6.53594 8.5431 6.58994 8.1511 6.64194 7.7431C6.69794 7.3351 6.75394 6.9191 6.80994 6.4951L6.11394 6.1651L6.19794 5.6911L8.27994 5.3971L8.57394 5.5351L7.78194 10.9951C7.76194 11.1391 7.76994 11.2491 7.80594 11.3251C7.84194 11.3971 7.89994 11.4331 7.97994 11.4331C8.05194 11.4331 8.12994 11.4111 8.21394 11.3671C8.30194 11.3191 8.41394 11.2391 8.54994 11.1271L8.70594 11.4931C8.66194 11.5531 8.57194 11.6491 8.43594 11.7811C8.30394 11.9131 8.12794 12.0371 7.90794 12.1531C7.68794 12.2691 7.42594 12.3271 7.12194 12.3271ZM7.84194 4.5931C7.60594 4.5931 7.40394 4.5051 7.23594 4.3291C7.07194 4.1531 6.99594 3.9471 7.00794 3.7111C7.01994 3.4191 7.11594 3.1731 7.29594 2.9731C7.47994 2.7731 7.72594 2.6731 8.03394 2.6731C8.29794 2.6731 8.50794 2.7591 8.66394 2.9311C8.81994 3.0991 8.89594 3.2931 8.89194 3.5131C8.88794 3.8171 8.79794 4.0731 8.62194 4.2811C8.44594 4.4891 8.18594 4.5931 7.84194 4.5931Z" fill="white"/></svg><span class="scq-tooltip" role="tooltip">המאזניים מציגים את משקל המערכת, וממנו ניתן לקבוע את מסתה.</span></span></span>:<br>מסת הבקבוק לפני שיחרור גז: 541.8 גרם<br>מסת הבקבוק אחרי שיחרור גז: 539.4 גרם</p>
+          <p class="s9q-qbody"><strong>מהי מסת הגז שהשתחרר?</strong></p>
+        </div>
+        <div class="scq-answers" id="s2q-answers" role="radiogroup" aria-label="מהי מסת הגז שהשתחרר?">
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="a" onclick="scqSelect('s2',this)"><span class="scq-opt-text">1081.2 גרם</span><span class="scq-radio" aria-hidden="true"></span></button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="b" onclick="scqSelect('s2',this)"><span class="scq-opt-text">2.0 גרם</span><span class="scq-radio" aria-hidden="true"></span></button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="c" onclick="scqSelect('s2',this)"><span class="scq-opt-text">539.4 גרם</span><span class="scq-radio" aria-hidden="true"></span></button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="d" onclick="scqSelect('s2',this)"><span class="scq-opt-text">2.4 גרם</span><span class="scq-radio" aria-hidden="true"></span></button>
+        </div>
+      </div>
+    </div>
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s2q-check" type="button" disabled onclick="scqCheck('s2')">צדקתי?</button>
+        <button class="scq-hint" id="s2q-hint" type="button" style="visibility:hidden" onclick="scqOpenHint('s2')"><span>אפשר רמז?</span><img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt=""></button>
+      </div>
+      <button class="scq-back" id="s2-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+  </section>
+
+  <!-- S3 — Screen 04 · DropdownQuestion 2 blanks, image variant (Q1c, was s12).
+       Two methods (Exp.jpg right / Exp35.jpg left), each maps to a goal. 1 attempt. -->
+  <section class="screen" data-screen="3" id="s3">
+    <div class="s12-scroll-area" id="s3-scroll-area">
+    <div class="s12-content">
+      <div class="scq-qtext peak-qtext s12-text">
+        <p class="s9q-qbody peak-intro"><strong>תלמידים ותלמידות בשיעור מדעים רצו לבדוק את מסת הגז שנמצא בבקבוק משקה תוסס.</strong></p>
+        <p class="s9q-qbody">הם בנו מערכת ניסוי:</p>
+        <ul class="peak-list">
+          <li>בקבוק המשקה חובר בצינורית למיכל איסוף ריק.</li>
+          <li>כאשר יפתחו את הבקבוק, הגז יעבור דרך הצינורית ויאסף במיכל.</li>
+        </ul>
+        <p class="s9q-qbody"><strong>סעיף ג:</strong> בקבוצה אחרת שביצעה את אותו ניסוי, הציעו שתי שיטות שונות למדידת הגז במשקה התוסס. לפניכם שתי תמונות של מערכות הניסוי.</p>
+        <p class="s9q-qbody"><strong>בחרו עבור כל שיטת מדידה את מטרת המחקר המתאימה ביותר.</strong></p>
+        <p class="s12-note">*המאזניים מציגים את משקל המערכת, וממנו ניתן לקבוע את מסתה.</p>
+      </div>
+
+      <div class="s12-cols">
+        <!-- Right column (Exp.jpg) — correct: השוואת מסת המערכת לפני ואחרי הניסוי -->
+        <div class="s12-col">
+          <div class="s12-img-frame">
+            <button class="img-zoom-btn" type="button" aria-label="הגדלת התמונה"
+                    data-zoom-src="assets/img/Exp.jpg" data-zoom-alt="שיטת מדידה 1">
+              <svg class="img-zoom-btn__icon" aria-hidden="true" width="20" height="20" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1C11.8661 1 15 4.13371 15 7.99902C15 11.8643 11.8661 14.998 8 14.998C4.1339 14.998 1.00002 11.8643 1 7.99902C1 4.13371 4.13389 1 8 1Z" stroke="currentColor" stroke-width="2"/><path d="M12.6221 14.188L14.2657 12.6141L19.928 18.5274C20.3626 18.9813 20.347 19.7016 19.8931 20.1362C19.4392 20.5708 18.7189 20.5552 18.2843 20.1013L12.6221 14.188Z" fill="currentColor"/></svg>
+            </button>
+            <img src="assets/img/Exp.jpg" alt="שיטת מדידה 1 — המאזניים מציגים 675.2 גרם">
+            <span class="s12-scale-label s12-scale-label--right" aria-hidden="true">675.2g</span>
+          </div>
+          <div class="mdq-dropdown-wrap" id="s3-wrap-right">
+            <button class="mdq-btn" id="s3-btn-right" type="button" data-empty="true" aria-haspopup="listbox" aria-expanded="false" onclick="s3Toggle('right')">
+              <svg class="mdq-chevron" width="16" height="8" viewBox="0 0 16 8" fill="none" aria-hidden="true"><path d="M1 1L8 7L15 1" stroke="#AEAEAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="mdq-selected" id="s3-selected-right">בחרו תשובה</span>
+            </button>
+            <ul class="mdq-list hidden" id="s3-list-right" role="listbox">
+              <li class="mdq-option" role="option" tabindex="0" onclick="s3Select('right','a')">השוואת מסת המערכת לפני ואחרי הניסוי</li>
+              <li class="mdq-option" role="option" tabindex="0" onclick="s3Select('right','b')">חישוב מסת הגז שהשתחרר</li>
+            </ul>
+          </div>
+        </div>
+        <!-- Left column (Exp35.jpg) — correct: חישוב מסת הגז שהשתחרר -->
+        <div class="s12-col">
+          <div class="s12-img-frame">
+            <button class="img-zoom-btn" type="button" aria-label="הגדלת התמונה"
+                    data-zoom-src="assets/img/Exp35.jpg" data-zoom-alt="שיטת מדידה 2">
+              <svg class="img-zoom-btn__icon" aria-hidden="true" width="20" height="20" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1C11.8661 1 15 4.13371 15 7.99902C15 11.8643 11.8661 14.998 8 14.998C4.1339 14.998 1.00002 11.8643 1 7.99902C1 4.13371 4.13389 1 8 1Z" stroke="currentColor" stroke-width="2"/><path d="M12.6221 14.188L14.2657 12.6141L19.928 18.5274C20.3626 18.9813 20.347 19.7016 19.8931 20.1362C19.4392 20.5708 18.7189 20.5552 18.2843 20.1013L12.6221 14.188Z" fill="currentColor"/></svg>
+            </button>
+            <img src="assets/img/Exp35.jpg" alt="שיטת מדידה 2 — המאזניים מציגים 350.7 גרם">
+            <span class="s12-scale-label s12-scale-label--left" aria-hidden="true">350.7g</span>
+          </div>
+          <div class="mdq-dropdown-wrap" id="s3-wrap-left">
+            <button class="mdq-btn" id="s3-btn-left" type="button" data-empty="true" aria-haspopup="listbox" aria-expanded="false" onclick="s3Toggle('left')">
+              <svg class="mdq-chevron" width="16" height="8" viewBox="0 0 16 8" fill="none" aria-hidden="true"><path d="M1 1L8 7L15 1" stroke="#AEAEAE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="mdq-selected" id="s3-selected-left">בחרו תשובה</span>
+            </button>
+            <ul class="mdq-list hidden" id="s3-list-left" role="listbox">
+              <li class="mdq-option" role="option" tabindex="0" onclick="s3Select('left','a')">השוואת מסת המערכת לפני ואחרי הניסוי</li>
+              <li class="mdq-option" role="option" tabindex="0" onclick="s3Select('left','b')">חישוב מסת הגז שהשתחרר</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s3-check" type="button" disabled onclick="s3Check()">צדקתי?</button>
+      </div>
+      <button class="scq-back" id="s3-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+  </section>
+
+  <!-- S4 — Screen 05 · SCQ text-only (Q1d, was s13). Correct = c. After answering → score branch. -->
+  <section class="screen" data-screen="4" id="s4">
+    <div class="scq-question">
+      <div class="s13q-only">
+        <div class="scq-qtext peak-qtext">
+          <p class="s9q-qbody peak-intro"><strong>תלמידים ותלמידות בשיעור מדעים רצו לבדוק את מסת הגז שנמצא בבקבוק משקה תוסס.</strong></p>
+          <p class="s9q-qbody">הם בנו מערכת ניסוי:</p>
+          <ul class="peak-list">
+            <li>בקבוק המשקה חובר בצינורית למיכל איסוף ריק.</li>
+            <li>כאשר יפתחו את הבקבוק, הגז יעבור דרך הצינורית ויאסף במיכל.</li>
+          </ul>
+          <p class="s9q-qbody"><strong>סעיף ד:</strong> בסיכום השיעור רוכזו התוצאות של כל הקבוצות בכיתה.<br>אלו התוצאות: קבוצה א - 2.4 גרם, קבוצה ב - 2.5 גרם, קבוצה ג - 3.1 גרם</p>
+          <p class="s9q-qbody"><strong>מהי הדרך הנכונה להשתמש בתוצאות אלו?</strong></p>
+        </div>
+        <div class="scq-answers" id="s4q-answers" role="radiogroup" aria-label="מהי הדרך הנכונה להשתמש בתוצאות אלו?">
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="a" onclick="scqSelect('s4',this)"><span class="scq-opt-text">לחשב ממוצע של כל התוצאות</span><span class="scq-radio" aria-hidden="true"></span></button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="b" onclick="scqSelect('s4',this)"><span class="scq-opt-text">לבחור בתוצאה הגבוהה ביותר כי היא מראה שינוי ברור יותר</span><span class="scq-radio" aria-hidden="true"></span></button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="c" onclick="scqSelect('s4',this)"><span class="scq-opt-text">לבדוק האם הייתה טעות מדידה או דליפה בקבוצה ג</span><span class="scq-radio" aria-hidden="true"></span></button>
+          <button class="scq-opt" type="button" role="radio" aria-checked="false" data-id="d" onclick="scqSelect('s4',this)"><span class="scq-opt-text">להתעלם מהמדידה של קבוצה ג׳ ולחשב ממוצע של שתי התוצאות הדומות.</span><span class="scq-radio" aria-hidden="true"></span></button>
+        </div>
+      </div>
+    </div>
+    <div class="scq-bar">
+      <div class="scq-bar-main">
+        <button class="scq-check" id="s4q-check" type="button" disabled onclick="scqCheck('s4')">צדקתי?</button>
+        <button class="scq-hint" id="s4q-hint" type="button" style="visibility:hidden" onclick="scqOpenHint('s4')"><span>אפשר רמז?</span><img class="scq-hint-ico" src="assets/img/icon-idea-blue.svg" alt=""></button>
+      </div>
+      <button class="scq-back" id="s4-back" type="button" onclick="goBack()">חזרה</button>
+    </div>
+  </section>
+
+  <!-- S5 — Screen 06 · TransitionScreen (shown if <3/4 correct, was s14). Finish. -->
+  <section class="screen" data-screen="5" id="s5">
+    <div class="s7-content">
+      <div class="s7-text">
+        <h1 class="s7-title">פחות הצלחת בשאלת השיא.<br>קורה, העיקר שניסית והתאמצת!</h1>
+      </div>
+      <div class="s7-video-wrap"><video id="s5-video" class="s7-video" autoplay muted playsinline></video></div>
+    </div>
+    <button class="btn-continue" id="s5-finish" type="button" onclick="finishLomda()">סיימתי</button>
+  </section>
+
+  <!-- S6 — Screen 07 · TransitionScreen (shown if ≥3/4 correct, was s15). Finish. -->
+  <section class="screen" data-screen="6" id="s6">
+    <div class="s7-content">
+      <div class="s7-text">
+        <h1 class="s7-title">כל הכבוד!<br>השלמת את היחידה בהצלחה!</h1>
+      </div>
+      <div class="s7-video-wrap"><video id="s6-video" class="s7-video" autoplay muted playsinline></video></div>
+    </div>
+    <button class="btn-continue" id="s6-finish" type="button" onclick="finishLomda()">סיימתי</button>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       Shared feedback popups + hint overlays (outside .screen)
+       ═══════════════════════════════════════════════════════════ -->
+
+  <!-- שיא — S1 popup + hint -->
+  <div class="scq-popup hidden" id="s1q-popup" onmousedown="popupMouseDown(event,'s1q-popup')" role="status" aria-live="polite">
+    <div class="scq-popup-header"><button class="scq-popup-close" type="button" onclick="scqClosePopup('s1')" aria-label="סגור">✕</button><p class="scq-popup-title" id="s1q-popup-title"></p></div>
+    <div class="scq-popup-body" id="s1q-popup-body"></div>
+  </div>
+  <div class="scq-hint-overlay hidden" id="s1q-hint-overlay" onclick="scqCloseHintOnBackdrop(event,'s1')">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true" aria-labelledby="s1q-hint-title">
+      <div class="scq-hint-content"><div class="scq-hint-text"><h2 class="scq-hint-title" id="s1q-hint-title">חישבו:</h2><div class="scq-hint-body"><p>האם הגז יצא מהמערכת — או רק עבר מקום בתוכה?</p></div></div><img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt=""></div>
+      <button class="scq-hint-close" type="button" onclick="scqCloseHint('s1')">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <!-- שיא — S2 popup + hint -->
+  <div class="scq-popup hidden" id="s2q-popup" onmousedown="popupMouseDown(event,'s2q-popup')" role="status" aria-live="polite">
+    <div class="scq-popup-header"><button class="scq-popup-close" type="button" onclick="scqClosePopup('s2')" aria-label="סגור">✕</button><p class="scq-popup-title" id="s2q-popup-title"></p></div>
+    <div class="scq-popup-body" id="s2q-popup-body"></div>
+  </div>
+  <div class="scq-hint-overlay hidden" id="s2q-hint-overlay" onclick="scqCloseHintOnBackdrop(event,'s2')">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true" aria-labelledby="s2q-hint-title">
+      <div class="scq-hint-content"><div class="scq-hint-text"><h2 class="scq-hint-title" id="s2q-hint-title">רמז</h2><div class="scq-hint-body"><p>השוו בין מסת הבקבוק לפני שחרור הגז ואחריו.</p></div></div><img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt=""></div>
+      <button class="scq-hint-close" type="button" onclick="scqCloseHint('s2')">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <!-- שיא — S3 dropdown popup (no hint) -->
+  <div class="scq-popup hidden" id="s3-popup" onmousedown="popupMouseDown(event,'s3-popup')" role="status" aria-live="polite">
+    <div class="scq-popup-header"><button class="scq-popup-close" type="button" onclick="hide('s3-popup')" aria-label="סגור">✕</button><p class="scq-popup-title" id="s3-popup-title"></p></div>
+    <div class="scq-popup-body" id="s3-popup-body"></div>
+  </div>
+
+  <!-- שיא — S4 popup + hint -->
+  <div class="scq-popup hidden" id="s4q-popup" onmousedown="popupMouseDown(event,'s4q-popup')" role="status" aria-live="polite">
+    <div class="scq-popup-header"><button class="scq-popup-close" type="button" onclick="scqClosePopup('s4')" aria-label="סגור">✕</button><p class="scq-popup-title" id="s4q-popup-title"></p></div>
+    <div class="scq-popup-body" id="s4q-popup-body"></div>
+  </div>
+  <div class="scq-hint-overlay hidden" id="s4q-hint-overlay" onclick="scqCloseHintOnBackdrop(event,'s4')">
+    <div class="scq-hint-popup" role="dialog" aria-modal="true" aria-labelledby="s4q-hint-title">
+      <div class="scq-hint-content"><div class="scq-hint-text"><h2 class="scq-hint-title" id="s4q-hint-title">חישבו:</h2><div class="scq-hint-body"><p>האם יש לכם ולכן בטחון מספיק לפרסם את כל הנתונים, כפי שהם, בלי לבדוק שוב?</p></div></div><img class="scq-hint-ico-lg" src="assets/img/icon-idea-blue.svg" alt=""></div>
+      <button class="scq-hint-close" type="button" onclick="scqCloseHint('s4')">חזרה לשאלה</button>
+    </div>
+  </div>
+
+  <!-- Shared image zoom modal -->
+  <div class="img-zoom-modal hidden" id="img-zoom-modal" aria-hidden="true">
+    <div class="img-zoom-modal__backdrop" data-zoom-close="true"></div>
+    <div class="img-zoom-modal__panel" role="dialog" aria-modal="true" aria-label="תצוגת תמונה מוגדלת">
+      <button class="img-zoom-modal__close" type="button" aria-label="סגירת התמונה" data-zoom-close="true"><svg class="img-zoom-modal__close-icon" aria-hidden="true" width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.192 1.192L13.808 13.808M13.808 1.192L1.192 13.808" stroke="currentColor" stroke-width="2.383" stroke-linecap="round"/></svg></button>
+      <div class="img-zoom-modal__stage" id="img-zoom-modal-stage"></div>
+    </div>
+  </div>
+
+    <!-- ═══════════════════════════════════════ REPORT MODAL ═══════════════════════════════════════ -->
+    <div id="report-modal" class="report-modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="report-modal-title">
+      <div class="report-modal-box">
+        <button class="report-close-btn" onclick="tryCloseReportModal()" aria-label="סגור">&#10005;</button>
+        <h2 class="report-modal-title" id="report-modal-title">דיווח על בעיה</h2>
+        <p class="report-modal-body">משהו לא ברור או לא עובד כמו שצריך? ספרו לנו מה קרה כדי שנטפל.</p>
+        <div class="report-field">
+          <label class="report-label" for="report-type">מה סוג הבעיה <span class="required-star">*</span></label>
+          <select class="report-select" id="report-type">
+            <option value="" disabled selected>בחרו סוג בעיה</option>
+            <option value="technical">תקלה טכנית או שמשהו לא עובד</option>
+            <option value="unclear">משהו לא ברור לי</option>
+            <option value="other">אחר</option>
+          </select>
+        </div>
+        <div class="report-field">
+          <label class="report-label" for="report-text">מה קרה? <span class="required-star">*</span></label>
+          <textarea class="report-textarea" id="report-text" maxlength="250" rows="4" placeholder="תארו את הבעיה..."></textarea>
+          <span class="report-char-count" id="report-char-count">0 / 250</span>
+        </div>
+        <p class="report-error" id="report-error" hidden>נא לבחור סוג בעיה ולתאר מה קרה.</p>
+        <div class="report-actions">
+          <button class="report-submit-btn" onclick="submitReport()">שליחה</button>
+          <button class="report-cancel-btn" onclick="tryCloseReportModal()">ביטול</button>
+        </div>
+        <div class="report-thanks" id="report-thanks" hidden>
+          <p>תודה! הדיווח נשלח. נטפל בהקדם.</p>
+          <button class="report-submit-btn" onclick="forceCloseReportModal()">סגירה</button>
+        </div>
+      </div>
+    </div>
+    <div id="report-confirm-modal" class="report-modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+      <div class="report-modal-box report-confirm-box">
+        <h2 class="report-modal-title" id="confirm-modal-title">בטוח לסגור את החלון?</h2>
+        <p class="report-modal-body">בלחיצה על סגירה לא יישלח דיווח</p>
+        <div class="report-actions">
+          <button class="report-cancel-btn" onclick="forceCloseReportModal()">סגור חלון</button>
+          <button class="report-submit-btn" onclick="backToReportForm()">אני רוצה לדווח</button>
+        </div>
+      </div>
+    </div>
+
+</div><!-- /#app -->
+
+<script src="js/main.js"></script>
+</body>
+</html>
